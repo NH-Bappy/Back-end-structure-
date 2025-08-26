@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const {types , Schema} = mongoose;
+const bcrypt = require('bcrypt');
 
 const userSchema = new Schema({
     name:{
@@ -101,5 +102,22 @@ const userSchema = new Schema({
     oauth: Boolean,
     refreshToken:String,
 });
+
+
+// make a hash password
+
+userSchema.pre('save' , async function (next) {
+    if(this.isModified("password")){
+        const hashPass =await bcrypt.hash(this.password , 10)
+        this.password = hashPass
+    }
+    next()
+})
+
+// compare password
+
+userSchema.methods.comparePassword =async function ( humanPass){
+    return await bcrypt.compare(humanPass , this.password);
+}
 
 module.exports = mongoose.model('User' , userSchema);
