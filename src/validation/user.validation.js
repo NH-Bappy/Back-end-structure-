@@ -1,4 +1,5 @@
 const Joi = require('joi');
+const { CustomError } = require('../utils/customError');
 
 
 const userValidationSchema = Joi.object({
@@ -26,6 +27,8 @@ const userValidationSchema = Joi.object({
             "any.required": "Password field cannot be left blank"
         })
 
+},{
+    allowKnown:true
 })
 
 
@@ -35,5 +38,6 @@ exports.validateUser = async(req) => {
         return value
     } catch (error) {
         console.log("error from validate method" , error);
+        throw new CustomError(401, error.details[0].message)
     }
 }

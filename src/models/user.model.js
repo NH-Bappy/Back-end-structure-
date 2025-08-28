@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const { types, Schema } = mongoose;
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { customError } = require('../utils/customError');
+const { CustomError } = require('../utils/customError');
 
 const userSchema = new Schema({
     name: {
@@ -144,7 +144,7 @@ userSchema.method.generateRefreshToke = async function () {
 userSchema.method.verifyAccessToken = async function (token) {
     const isValidAccessToken = await jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
     if (!isValidAccessToken) {
-        throw new customError(401, "your token is Invalid")
+        throw new CustomError(401, "your token is Invalid")
     }
 }
 
@@ -153,7 +153,7 @@ userSchema.method.verifyAccessToken = async function (token) {
 userSchema.method.verifyRefreshToken = async function (token) {
     const isValidRefreshToken = await jwt.verify(token, process.env.REFRESH_TOKEN_SECRET)
     if(!isValidRefreshToken){
-        throw new customError(401 , "your refresh token is Invalid")
+        throw new CustomError(401 , "your refresh token is Invalid")
     }
 }
 
