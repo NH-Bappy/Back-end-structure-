@@ -29,3 +29,11 @@ const userValidationSchema = Joi.object({
 })
 
 
+exports.validateUser = async(req) => {
+    try {
+        const value = await userValidationSchema.validateAsync(req.body)
+        return value
+    } catch (error) {
+        console.log("error from validate method" , error);
+    }
+}
