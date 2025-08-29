@@ -14,7 +14,7 @@ const userValidationSchema = Joi.object({
         }),
 
     password: Joi.string()
-        .trim()
+        .trim() 
         .required()
         // .min(8) // minimum 8 characters
         // .max(30) // maximum 30 characters
@@ -25,19 +25,29 @@ const userValidationSchema = Joi.object({
             "string.max": "Password must not be longer than 30 characters",
             "string.pattern.base": "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character",
             "any.required": "Password field cannot be left blank"
-        })
+        }),
 
-},{
-    allowKnown:true
+    phoneNumber: Joi.string()
+        .trim()
+        .required()
+        .pattern(/^(?:\+88|01)?\d{11}$/) // Example: Bangladesh phone numbers (+8801XXXXXXXXX or 01XXXXXXXXX)
+        .messages({
+            "string.empty": "Phone number is required",
+            "string.pattern.base": "Phone number must be a valid Bangladeshi number (e.g. +8801XXXXXXXXX or 01XXXXXXXXX)",
+            "any.required": "Phone number field cannot be left blank"
+        }),
+
+}, {
+    allowKnown: true
 })
 
 
-exports.validateUser = async(req) => {
+exports.validateUser = async (req) => {
     try {
         const value = await userValidationSchema.validateAsync(req.body)
         return value
     } catch (error) {
-        console.log("error from validate method" , error);
+        console.log("error from validate method", error);
         throw new CustomError(401, error.details[0].message)
     }
 }

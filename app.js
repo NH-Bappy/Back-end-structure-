@@ -12,7 +12,7 @@ const { globalErrorHandler } = require('./src/utils/globalErrorHandler');
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(cookieParser());
-app.use(cors({origin: ["http://localhost:4000"]}))
+app.use(cors({origin: ["http://localhost:4000"]})) //kaon server ke  data dibo kaon server ke  data dibo na ta thik kore 
 
 // routes
 
