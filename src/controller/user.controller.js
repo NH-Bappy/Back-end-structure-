@@ -15,5 +15,17 @@ exports.registration = asyncHandler( async(req ,res) => {
     // console.log(email , password)
 
     const value = await validateUser(req)
-    console.log(value)
+    // console.log(value)
+
+    //now save the user into database
+
+    const user = await new userModel({
+        name: value.name,
+        email: value.email,
+        password: value.password
+    }).save()
+
+    if(!user){
+        throw new CustomError(501, "user is not registered server error")
+    }
 })

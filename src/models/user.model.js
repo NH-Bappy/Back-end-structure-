@@ -22,7 +22,7 @@ const userSchema = new Schema({
     },
     phoneNumber: {
         type: Number,
-        required: [true, "password missing"],
+        // required: [true, "password missing"],
         trim: true
     },
     image: {
@@ -111,8 +111,7 @@ const userSchema = new Schema({
 // make a hash password
 userSchema.pre('save', async function (next) {
     if (this.isModified("password")) {
-        const hashPass = await bcrypt.hash(this.password, 10)
-        this.password = hashPass
+        this.password = await bcrypt.hash(this.password, 10)
     }
     next()
 })
@@ -152,8 +151,8 @@ userSchema.method.verifyAccessToken = async function (token) {
 
 userSchema.method.verifyRefreshToken = async function (token) {
     const isValidRefreshToken = await jwt.verify(token, process.env.REFRESH_TOKEN_SECRET)
-    if(!isValidRefreshToken){
-        throw new CustomError(401 , "your refresh token is Invalid")
+    if (!isValidRefreshToken) {
+        throw new CustomError(401, "your refresh token is Invalid")
     }
 }
 

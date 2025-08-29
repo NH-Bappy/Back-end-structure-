@@ -29,7 +29,7 @@ const userValidationSchema = Joi.object({
 
     phoneNumber: Joi.string()
         .trim()
-        .required()
+        // .required()
         .pattern(/^(?:\+88|01)?\d{11}$/) // Example: Bangladesh phone numbers (+8801XXXXXXXXX or 01XXXXXXXXX)
         .messages({
             "string.empty": "Phone number is required",
@@ -37,9 +37,7 @@ const userValidationSchema = Joi.object({
             "any.required": "Phone number field cannot be left blank"
         }),
 
-}, {
-    allowKnown: true
-})
+}).unknown(true);
 
 
 exports.validateUser = async (req) => {
