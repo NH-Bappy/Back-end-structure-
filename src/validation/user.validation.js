@@ -30,7 +30,7 @@ const userValidationSchema = Joi.object({
     phoneNumber: Joi.string()
         .trim()
         // .required()
-        .pattern(/^(?:\+88|01)?\d{11}$/) // Example: Bangladesh phone numbers (+8801XXXXXXXXX or 01XXXXXXXXX)
+        .pattern(/^(?:\+88|01)?\d{11}$/)
         .messages({
             "string.empty": "Phone number is required",
             "string.pattern.base": "Phone number must be a valid Bangladeshi number (e.g. +8801XXXXXXXXX or 01XXXXXXXXX)",
@@ -42,10 +42,10 @@ const userValidationSchema = Joi.object({
 
 exports.validateUser = async (req) => {
     try {
-        const value = await userValidationSchema.validateAsync(req.body)
+        const value = await userValidationSchema.validateAsync(req.body) //validateAsync checks if the data follows the schema rules (e.g., required fields, email format, password length, etc.).
         return value
     } catch (error) {
         console.log("error from validate method", error);
-        throw new CustomError(401, error.details[0].message)
+        throw new CustomError(401, error.details[0].message) //error.details[0].message [is the human-readable message from Joi (e.g., "Email is required").]
     }
 }
