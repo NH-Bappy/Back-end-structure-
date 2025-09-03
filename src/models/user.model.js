@@ -3,6 +3,7 @@ const { types, Schema } = mongoose;
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { CustomError } = require('../utils/customError');
+const { number } = require('joi');
 
 const userSchema = new Schema({
     name: {
@@ -87,6 +88,8 @@ const userSchema = new Schema({
     },
     resetPasswordOTP: Number,
     resetPasswordExpires: Date,
+    sendOtp: Number,
+    OtpExpiresTime: Date,
     twoFactorEnabled: {
         type: Boolean,
         default: false,
