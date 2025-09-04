@@ -28,5 +28,5 @@ exports.emailSend = async (email, template, subject) => {
 // make otp
 
 exports.Otp = () => {
-   return crypto.randomInt(10000 , 99999)
+   return crypto.randomInt(10000 , 99999)  // [10000 , 99999] this shows how many number you went to sent ,if 4 than take 4 number 0r 5 take 5 number
 }

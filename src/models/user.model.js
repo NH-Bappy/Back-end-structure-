@@ -13,7 +13,6 @@ const userSchema = new Schema({
     email: {
         type: String,
         required: [true, "email missing"],
-        unique: true,
         trim: true
     },
     password: {
@@ -88,8 +87,8 @@ const userSchema = new Schema({
     },
     resetPasswordOTP: Number,
     resetPasswordExpires: Date,
-    sendOtp: Number,
-    OtpExpiresTime: Date,
+    // sendOtp: Number,
+    // OtpExpiresTime: Date,
     twoFactorEnabled: {
         type: Boolean,
         default: false,

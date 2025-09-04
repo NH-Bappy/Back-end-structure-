@@ -5,7 +5,7 @@ const { CustomError } = require('../utils/customError');
 const userValidationSchema = Joi.object({
     email: Joi.string()
         .trim()
-        .required()
+        // .required()
         .pattern(/^([\w-\.]+)@([\w-]+\.)+[\w-]{2,4}?$/)
         .messages({
             "string.empty": "Email is required",

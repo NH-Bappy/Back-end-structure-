@@ -2,9 +2,9 @@ const express = require('express');
 const _ = express.Router();
 const userController = require('../../controller/user.controller')
 
-_.route("/registration").post(userController.registration)
-
-
+_.route("/registration").post(userController.registration);
+_.route("/verify-account").post(userController.verifyUser);
+_.route("/resend-otp").post(userController.resendOtp);
 module.exports = _;
 
 
