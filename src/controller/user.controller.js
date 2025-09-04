@@ -87,10 +87,27 @@ exports.resendOtp = asyncHandler(async (req, res) => {
         await user.save();
     }
     apiResponse.sendSuccess(res, 201, "your otp send successful check your email")
-})
+});
 
 // forget Password
 exports.forgetPassword = asyncHandler(async (req ,res) => {
     const {email} = req.body;
     if(!email) throw new CustomError(401 , "email missing");
+    const user = await userModel.findOne({email})
+    if(!user) throw new CustomError(401 , "user not found you need to register first");
+    return res.status(301).redirect('https://github.com/Afridul369/nodeBackend/blob/main/src/controller/user.controller.js')
+});
+
+// reset password
+exports.resetPassword = asyncHandler(async (req ,res ) => {
+    const {email , newPassword , confirmPassword} = req.body
+    let pattern = new RegExp("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,30}$");
+    if(!newPassword & !confirmPassword) throw new CustomError(401, "password is missing");
+    if(!pattern.test(newPassword)) throw new CustomError(401 ,"Password must include at least one uppercase letter, one lowercase letter, one number, and one special character");
+    if(newPassword !== confirmPassword) throw new CustomError(401 , "password not match");
+    const user = await userModel.findOne({email})
+    if(!user) throw new CustomError(401 , "user not found you");
+    user.password = newPassword;
+    await user.save();
+    return res.status(302).redirect('www.front.com/login');
 })

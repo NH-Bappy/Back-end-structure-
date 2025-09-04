@@ -5,6 +5,11 @@ const userController = require('../../controller/user.controller')
 _.route("/registration").post(userController.registration);
 _.route("/verify-account").post(userController.verifyUser);
 _.route("/resend-otp").post(userController.resendOtp);
+_.route("/forgot-password").post(userController.forgetPassword);
+_.route("/reset-password").post(userController.resetPassword);
+
+
+
 module.exports = _;
 
 
