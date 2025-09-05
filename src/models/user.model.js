@@ -87,8 +87,6 @@ const userSchema = new Schema({
     },
     resetPasswordOTP: Number,
     resetPasswordExpires: Date,
-    // sendOtp: Number,
-    // OtpExpiresTime: Date,
     twoFactorEnabled: {
         type: Boolean,
         default: false,

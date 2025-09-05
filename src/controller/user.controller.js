@@ -111,3 +111,19 @@ exports.resetPassword = asyncHandler(async (req ,res ) => {
     await user.save();
     return res.status(302).redirect('www.front.com/login');
 })
+
+// login
+exports.login = asyncHandler(async (req , res) => {
+    const {email , password} = req.body;
+    if(email == undefined) throw new CustomError(401 , "email is missing");
+    // search database 
+    const user = await userModel.findOne({email});
+    if(!user) throw new CustomError(401 , "user not found");
+    
+    // password is right or not
+    const checkPassword = await user.comparePassword(password);
+    if(!checkPassword) throw new CustomError(401 ,  "your password or email in incorrect");
+
+// generate access token and refresh token
+
+})

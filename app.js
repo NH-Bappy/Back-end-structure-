@@ -6,7 +6,6 @@ const { globalErrorHandler } = require('./src/utils/globalErrorHandler');
 
 // use of middleware
 
-
 // Make a json to object
 
 app.use(express.json());
