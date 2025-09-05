@@ -150,23 +150,28 @@ exports.login = asyncHandler(async (req, res) => {
 })
 
 // logout
-exports.logout = asyncHandler(async (req , res) => {
+exports.logout = asyncHandler(async (req, res) => {
+    // Get token from request body or authorization header
     const token = req?.body?.token || req.headers?.authorization;
-    const {userId} = await jwt.verify(token , process.env.ACCESS_TOKEN_SECRET);
-    // console.log(decode)
 
-    // find the user
+    // Verify token and extract userId (will throw error if token is invalid/expired)
+    const { userId } = await jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+
+    // Find the user in the database by userId
     const user = await userModel.findById(userId);
-    // console.log(customer);
-        res.clearCookie("refreshToken",{
-        httpOnly: true,
-        secure: process.env.NODE_ENV == "development" ? false : true,
-        sameSite: "none",
-        path: "/",
-        maxAge: 15 * 24 * 60 * 60 * 1000,
+
+    // Clear refreshToken cookie from client side
+    res.clearCookie("refreshToken", {
+        httpOnly: true, // prevents client-side JS access (XSS protection)
+        secure: process.env.NODE_ENV == "development" ? false : true, // HTTPS only in production
+        sameSite: "none", // allow cross-site requests (important for frontend-backend on different domains)
+        path: "/", // cookie valid for entire domain
     });
 
+    // Remove refreshToken from database (so token cannot be reused)
     user.refreshToken = null;
     await user.save();
-    apiResponse.sendSuccess(res , 201 , "successfully logout" ,{user})
-})
+
+    // Send success response
+    apiResponse.sendSuccess(res, 201, "successfully logout", { user });
+});
