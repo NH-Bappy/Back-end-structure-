@@ -122,39 +122,53 @@ userSchema.methods.comparePassword = async function (humanPass) {
 }
 
 //generate access Token
-userSchema.method.generateAccessToken = async function () {
-    return await jwt.sign({
-        userId: this._id,
+
+// jwt.sign(payload, secret, options)
+// This creates a JWT token (JSON Web Token).
+// It has three parts:
+
+
+userSchema.methods.generateAccessToken = async function () {
+    return jwt.sign({
+        userId: this._id, //Payload → Data you put inside (like userId, email, role).
         email: this.email,
         name: this.name,
         role: this.role
-    }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRE })
-
+    },
+        process.env.ACCESS_TOKEN_SECRET,/** Secret → Key to sign and secure the token (kept in .env) */
+        { expiresIn: process.env.ACCESS_TOKEN_EXPIRE })  //Options → e.g. how long the token is valid.
 }
 
 //generate refresh Token
-userSchema.method.generateRefreshToke = async function () {
-    return await jwt.sign({
+userSchema.methods.generateRefreshToke = async function () {
+    return jwt.sign({
         userId: this._id,
     }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRE })
 }
 
-// verify accessToken 
-userSchema.method.verifyAccessToken = async function (token) {
-    const isValidAccessToken = await jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
-    if (!isValidAccessToken) {
-        throw new CustomError(401, "your token is Invalid")
+// verify accessToken ||This method checks if a given JWT token is valid
+userSchema.methods.verifyAccessToken = async function (token) {
+    try {
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
+        return decoded   // return user data if valid
+    } catch (error) {
+        throw new CustomError(401, "your token is Invalid or expired")
     }
 }
+
 
 // verify refresh token
 
-userSchema.method.verifyRefreshToken = async function (token) {
-    const isValidRefreshToken = await jwt.verify(token, process.env.REFRESH_TOKEN_SECRET)
-    if (!isValidRefreshToken) {
-        throw new CustomError(401, "your refresh token is Invalid")
+userSchema.methods.verifyRefreshToken = function (token) {
+    try {
+        const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET)
+        return decoded   // return user data if valid
+    } catch (error) {
+        throw new CustomError(401, "your refresh token is Invalid or expired")
     }
 }
+
+
 
 
 module.exports = mongoose.model('User', userSchema);

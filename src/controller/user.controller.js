@@ -1,10 +1,12 @@
+require('dotenv').config();
 const { apiResponse } = require("../utils/apiResponse");
 const { asyncHandler } = require("../utils/asyncHandler");
 const { CustomError } = require("../utils/customError");
 const userModel = require('../models/user.model');
 const { validateUser } = require("../validation/user.validation");
 const { registrationTemplate, resendOtpTemplate } = require("../template/emailTemplate");
-const { Otp, emailSend } = require('../helpers/helper')
+const { Otp, emailSend } = require('../helpers/helper');
+const jwt = require('jsonwebtoken');
 
 
 // user registration
@@ -40,7 +42,7 @@ exports.registration = asyncHandler(async (req, res) => {
     const verifyEmailLink = `www.frontend.com/verifyEmail${user.email}`
     user.resetPasswordOTP = Otp();
     user.resetPasswordExpires = Date.now() + 10 * 60 * 1000;
-    const template = registrationTemplate(user.name,user.email,user.resetPasswordOTP,user.resetPasswordExpires,verifyEmailLink);
+    const template = registrationTemplate(user.name, user.email, user.resetPasswordOTP, user.resetPasswordExpires, verifyEmailLink);
 
     // send email to customer
     const result = await emailSend(user.email, template, "Confirm Your Email");
@@ -82,7 +84,7 @@ exports.resendOtp = asyncHandler(async (req, res) => {
     user.resetPasswordOTP = Otp();
     user.resetPasswordExpires = Date.now() + 10 * 60 * 1000;
     if (email) {
-        const template = resendOtpTemplate(user.name,user.email,user.resetPasswordOTP,user.resetPasswordExpires,);
+        const template = resendOtpTemplate(user.name, user.email, user.resetPasswordOTP, user.resetPasswordExpires,);
         await emailSend(user.email, template, "Confirm Your Email");
         await user.save();
     }
@@ -90,40 +92,81 @@ exports.resendOtp = asyncHandler(async (req, res) => {
 });
 
 // forget Password
-exports.forgetPassword = asyncHandler(async (req ,res) => {
-    const {email} = req.body;
-    if(!email) throw new CustomError(401 , "email missing");
-    const user = await userModel.findOne({email})
-    if(!user) throw new CustomError(401 , "user not found you need to register first");
+exports.forgetPassword = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+    if (!email) throw new CustomError(401, "email missing");
+    const user = await userModel.findOne({ email })
+    if (!user) throw new CustomError(401, "user not found you need to register first");
     return res.status(301).redirect('https://github.com/Afridul369/nodeBackend/blob/main/src/controller/user.controller.js')
 });
 
 // reset password
-exports.resetPassword = asyncHandler(async (req ,res ) => {
-    const {email , newPassword , confirmPassword} = req.body
+exports.resetPassword = asyncHandler(async (req, res) => {
+    const { email, newPassword, confirmPassword } = req.body
     let pattern = new RegExp("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,30}$");
-    if(!newPassword & !confirmPassword) throw new CustomError(401, "password is missing");
-    if(!pattern.test(newPassword)) throw new CustomError(401 ,"Password must include at least one uppercase letter, one lowercase letter, one number, and one special character");
-    if(newPassword !== confirmPassword) throw new CustomError(401 , "password not match");
-    const user = await userModel.findOne({email})
-    if(!user) throw new CustomError(401 , "user not found you");
+    if (!newPassword & !confirmPassword) throw new CustomError(401, "password is missing");
+    if (!pattern.test(newPassword)) throw new CustomError(401, "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character");
+    if (newPassword !== confirmPassword) throw new CustomError(401, "password not match");
+    const user = await userModel.findOne({ email })
+    if (!user) throw new CustomError(401, "user not found you");
     user.password = newPassword;
     await user.save();
     return res.status(302).redirect('www.front.com/login');
 })
 
 // login
-exports.login = asyncHandler(async (req , res) => {
-    const {email , password} = req.body;
-    if(email == undefined) throw new CustomError(401 , "email is missing");
+exports.login = asyncHandler(async (req, res) => {
+    const { email, password } = req.body;
+    if (email == undefined) throw new CustomError(401, "email is missing");
     // search database 
-    const user = await userModel.findOne({email});
-    if(!user) throw new CustomError(401 , "user not found");
-    
+    const user = await userModel.findOne({ email });
+    if (!user) throw new CustomError(401, "user not found");
+
     // password is right or not
     const checkPassword = await user.comparePassword(password);
-    if(!checkPassword) throw new CustomError(401 ,  "your password or email in incorrect");
+    if (!checkPassword) throw new CustomError(401, "your password or email in incorrect");
 
-// generate access token and refresh token
+    // generate access token and refresh token
+    const accessToken = await user.generateAccessToken();
+    const refreshToken = await user.generateRefreshToke();
 
+    //This cookie will store your refreshToken on the client’s browser
+
+    res.cookie("refreshToken", refreshToken, {
+        httpOnly: true, //The cookie cannot be accessed via JavaScript (document.cookie) on the client side.
+        secure: process.env.NODE_ENV == "development" ? false : true,
+        sameSite: "none",// allows the cookie to be sent across different domains (important if your frontend and backend are on different domains).
+        path: "/",
+        maxAge: 15 * 24 * 60 * 60 * 1000,
+    })
+    // refresh token save into database
+    await user.updateOne({ refreshToken });
+    apiResponse.sendSuccess(res, 200, "Login successful", {
+        accessToken,
+        userName: user.name,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+    });
+})
+
+// logout
+exports.logout = asyncHandler(async (req , res) => {
+    const token = req?.body?.token || req.headers?.authorization;
+    const {userId} = await jwt.verify(token , process.env.ACCESS_TOKEN_SECRET);
+    // console.log(decode)
+
+    // find the user
+    const user = await userModel.findById(userId);
+    // console.log(customer);
+        res.clearCookie("refreshToken",{
+        httpOnly: true,
+        secure: process.env.NODE_ENV == "development" ? false : true,
+        sameSite: "none",
+        path: "/",
+        maxAge: 15 * 24 * 60 * 60 * 1000,
+    });
+
+    user.refreshToken = null;
+    await user.save();
+    apiResponse.sendSuccess(res , 201 , "successfully logout" ,{user})
 })

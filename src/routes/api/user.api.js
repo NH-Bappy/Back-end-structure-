@@ -7,6 +7,8 @@ _.route("/verify-account").post(userController.verifyUser);
 _.route("/resend-otp").post(userController.resendOtp);
 _.route("/forgot-password").post(userController.forgetPassword);
 _.route("/reset-password").post(userController.resetPassword);
+_.route("/login").post(userController.login);
+_.route("/logout").post(userController.logout);
 
 
 
