@@ -22,7 +22,7 @@ const categorySchema = new mongoose.Schema({
     subCategory: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: subCategory
+            ref: "subCategory",
         }
     ],
     isActive: {
