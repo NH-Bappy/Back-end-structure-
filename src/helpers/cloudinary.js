@@ -37,3 +37,14 @@ exports.uploadFileInCloudinary = async (filePath) => {
         throw new CustomError(401, error.message);
     }
 };
+
+//dec delete cloudinary image
+exports.removeCloudinaryFile = async(publicId) => {
+    try {
+        const res = await cloudinary.uploader.destroy(publicId);
+        return res.result
+    } catch (error) {
+        console.log("error from cloudinary file delete" ,error);
+        throw new CustomError(400 ,error.message)
+    }
+}
