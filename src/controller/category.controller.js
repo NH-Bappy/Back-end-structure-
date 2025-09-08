@@ -55,3 +55,20 @@ exports.modifyCategory = asyncHandler(async (req , res) => {
     await category.save()
     apiResponse.sendSuccess(res , 200 ,"category update successfully" ,category)
 });
+
+
+// delete category from data base
+exports.removeCategory = asyncHandler(async (req ,res) => {
+    const {slug} = req.params;
+    if(!slug) throw new CustomError(401 , "slug is missing");
+    const category = await categoryModel.findOne({slug});
+    if(!category) throw new CustomError(500 , "category not found");
+    if(req?.files?.image){
+        const splitLink = category.image.split('/');
+        const lastPart = splitLink[splitLink.length -1]
+        const removeImage = await removeCloudinaryFile(lastPart.split('?')[0]);
+        if(removeImage !== "ok") throw new CustomError(401 , "image not deleted");
+    }
+    const removeCategory =await categoryModel.findOneAndDelete({slug})
+    apiResponse.sendSuccess(res , 200 , "category remove successfully" , removeCategory)
+})

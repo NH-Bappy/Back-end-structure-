@@ -7,6 +7,6 @@ _.route("/create-category").post(upload.fields([{name: "image" , maxCount:1}]),c
 _.route("/find-all-category").get(categoryController.findAllCategories);
 _.route("/specific-category/:slug").get(categoryController.getCategoryBySlug);
 _.route("/edit-category/:slug").put(upload.fields([{name: "image" , maxCount:1}]),categoryController.modifyCategory)
-
+_.route("/remove-category/:slug").delete(categoryController.removeCategory);
 
 module.exports = _;
