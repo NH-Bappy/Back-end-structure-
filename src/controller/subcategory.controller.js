@@ -44,7 +44,13 @@ exports.modifyCategory = asyncHandler(async (req , res) => {
 
 // @desc delete subcategory
 
-
+exports. removeSubcategory = asyncHandler(async(req,res) => {
+    const {slug} = req.params;
+    if (!slug) throw new CustomError(400, "Slug is required");
+    const removeSub = await subCategoryModel.findOneAndDelete({slug});
+    if(!removeSub) throw new CustomError(401 , "removeSubcategory is missing");
+    apiResponse.sendSuccess(res , 200 , "remove subcategory successfully" , removeSub);
+})
 
 
 

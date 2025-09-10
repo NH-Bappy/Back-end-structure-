@@ -5,5 +5,6 @@ _.route("/create-subcategory").post(subcategoryController.createNewSubCategory);
 _.route("/find-all-subcategory").get(subcategoryController.findAllSubcategories);
 _.route("/request-subcategory/:slug").get(subcategoryController.getSubcategoryBySlug);
 _.route("/modify-subcategory/:slug").put(subcategoryController.modifyCategory);
+_.route("/remove-Subcategory/:slug").delete(subcategoryController.removeSubcategory)
 
 module.exports = _;
