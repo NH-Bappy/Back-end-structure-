@@ -1,8 +1,14 @@
 const Joi = require("joi");                                 // Import Joi for validation
 const mongoose = require("mongoose");
-const { customError } = require("../../utils/customError");
+const { CustomError } = require("../utils/customError");
+
+
 
 // helper: check if valid MongoDB ObjectId
+// helpers → a Joi utility object that helps you return custom validation errors.
+/*mongoose.Types.ObjectId.isValid(value) is a built-in Mongoose method.
+It checks whether the given value is a valid MongoDB ObjectId (24-character hex string).
+*/
 const isValidObjectId = (value, helpers) => {
     if (!mongoose.Types.ObjectId.isValid(value)) {
         return helpers.error("any.invalid");                 // Return Joi error if invalid ObjectId
@@ -34,6 +40,6 @@ exports.validateSubcategory = async (req) => {
     } catch (error) {
         console.log("Error from validateSubcategory method:", error);
         // Throw custom error with Joi's first validation message
-        throw new customError(401, error.details[0].message);
+        throw new CustomError(401, error.details[0].message);
     }
 };
