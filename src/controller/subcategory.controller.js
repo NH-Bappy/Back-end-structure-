@@ -31,3 +31,21 @@ exports.getSubcategoryBySlug = asyncHandler(async(req ,res) => {
     if(!specificSubcategory) throw new CustomError(401 , "Requested subcategory not found");
     apiResponse.sendSuccess(res , 200 , "Requested subcategory found successfully" , specificSubcategory);
 });
+
+//@desc update subcategory
+exports.modifyCategory = asyncHandler(async (req , res) => {
+    const {slug} = req.params;
+    if(!slug) throw new CustomError(401 , " Subcategory not found");
+    const updateSubcategory = await subCategoryModel.findOneAndUpdate({slug}, {...req.body} , {new:true});
+    if (!updateSubcategory) throw new CustomError(401 , "updateSubcategory is missing");
+    apiResponse.sendSuccess(res , 200 , "update subcategory successfully" , updateSubcategory);
+});
+
+
+// @desc delete subcategory
+
+
+
+
+
+

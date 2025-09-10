@@ -4,5 +4,6 @@ const subcategoryController = require('../../controller/subcategory.controller')
 _.route("/create-subcategory").post(subcategoryController.createNewSubCategory);
 _.route("/find-all-subcategory").get(subcategoryController.findAllSubcategories);
 _.route("/request-subcategory/:slug").get(subcategoryController.getSubcategoryBySlug);
+_.route("/modify-subcategory/:slug").put(subcategoryController.modifyCategory);
 
 module.exports = _;

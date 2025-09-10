@@ -39,6 +39,11 @@ subCategorySchema.pre("save", function (next) {   // Pre-save middleware runs be
     next();                                       // Continue with the save operation
 });
 
+
+
+
+
+
 // update slug name
 
 subCategorySchema.pre("findOneAndUpdate", function (next) {   // Middleware runs before "findOneAndUpdate"
