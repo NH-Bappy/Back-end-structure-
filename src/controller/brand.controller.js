@@ -6,7 +6,7 @@ const { CustomError } = require('../utils/customError');
 const { validateBrandRequest } = require('../validation/brand.validation');
 
 
-//@desc new brand 
+//@desc new brand create
 exports.registerBrand = asyncHandler(async (req ,res) => {
     const value = await validateBrandRequest(req)
     // console.log(value);
@@ -18,3 +18,10 @@ exports.registerBrand = asyncHandler(async (req ,res) => {
     if(!brand) throw new CustomError(501 , "some wrong with your give data brand not created");
     apiResponse.sendSuccess(res , 200 , "brand created successfully" , brand);
 });
+
+//@ find all brand 
+exports.findAllBrand = asyncHandler(async(req ,res ) => {
+    const brand = await brandModel.find({}).sort({createdAt: -1});
+    if (!brand) throw new CustomError(401 , "all brand are not found");
+    apiResponse.sendSuccess(res , 200 , "find all brand successfully" , brand);
+})
