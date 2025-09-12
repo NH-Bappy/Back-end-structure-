@@ -3,6 +3,7 @@ const { apiResponse } = require("../utils/apiResponse");
 const { asyncHandler } = require("../utils/asyncHandler");
 const { CustomError } = require("../utils/customError");
 const { validateSubcategory } = require("../validation/subCategory.validation");
+const categoryModel = require('../models/category.model'); 
 
 
 
@@ -11,9 +12,12 @@ const { validateSubcategory } = require("../validation/subCategory.validation");
 exports.createNewSubCategory = asyncHandler(async (req ,res) => {
     const value = await validateSubcategory(req);
     // console.log(value);
-    const subcategory = await subCategoryModel.create(value);
-    if (!subcategory) throw new CustomError(401 , "please try again creating subcategory");
-    apiResponse.sendSuccess(res , 200 , "Successfully created a new subcategory", subcategory);
+    // Create a new subcategory document in the database using the validated values
+    const subcategoryObject = await subCategoryModel.create(value); //where we find the new whole object
+    // console.log(subcategory)
+    await categoryModel.findByIdAndUpdate({_id: value.category}, {$push: {subCategory: subcategoryObject._id}} , {new: true})
+    if (!subcategoryObject) throw new CustomError(401 , "please try again creating subcategory");
+    apiResponse.sendSuccess(res , 200 , "Successfully created a new subcategory", subcategoryObject);
 });
 
 //@desc show all the category
@@ -48,6 +52,8 @@ exports. removeSubcategory = asyncHandler(async(req,res) => {
     const {slug} = req.params;
     if (!slug) throw new CustomError(400, "Slug is required");
     const removeSub = await subCategoryModel.findOneAndDelete({slug});
+    // remove subcategory id from category model
+    await categoryModel.findOneAndUpdate({_id:removeSub.category}, {$pull:{subCategory: removeSub._id}} ,{new: true})
     if(!removeSub) throw new CustomError(401 , "removeSubcategory is missing");
     apiResponse.sendSuccess(res , 200 , "remove subcategory successfully" , removeSub);
 })

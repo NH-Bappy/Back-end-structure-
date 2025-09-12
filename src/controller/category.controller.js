@@ -9,11 +9,14 @@ const { apiResponse } = require('../utils/apiResponse');
 exports.newCategory = asyncHandler(async (req,res) => {
     const value = await validateCategory(req);
     // console.log(value)
+//@That line uploads the image file to Cloudinary and returns its hosted URL, so you can save the URL in your database instead of storing the file locally.
     const imageUrl = await uploadFileInCloudinary(value?.image?.path);
+// Creates a new document in MongoDB using your categoryModel, with the given name and image
     const category = await new categoryModel({
         name:value.name,
         image:imageUrl
-    }).save()
+    }).save()//Immediately saves it to the database with .save().
+// Because of the await, it waits until MongoDB finishes saving and then stores the created document in the category variable.
     if(!category) throw new CustomError(401 , "some thing wrong please try again");
     apiResponse.sendSuccess(res , 201 ,"category created successfully" , category)
 });

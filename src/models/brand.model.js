@@ -1,8 +1,6 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 require('dotenv').config();
-const { apiResponse } = require("../utils/apiResponse");
-const { asyncHandler } = require("../utils/asyncHandler");
 const { CustomError } = require("../utils/customError");
 const slugify = require('slugify');
 
@@ -17,6 +15,7 @@ const brandSchema = new Schema({
     },
     image: {
         type: String,     // image URL or path
+        required: true,
     },
     slug: {
         type: String,
@@ -27,10 +26,14 @@ const brandSchema = new Schema({
             ref: "SubCategory" // relation with SubCategory model
         }
     ],
+    since: {
+        type: Number,
+        require: true
+    },
     isActive: {
         type: Boolean,
         default: true,    // default active brand
-    }
+    },
 }, 
     { timestamps: true }
 ); // adds createdAt & updatedAt automatically
