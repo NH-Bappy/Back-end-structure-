@@ -74,4 +74,4 @@ exports.removeCategory = asyncHandler(async (req ,res) => {
     }
     const removeCategory =await categoryModel.findOneAndDelete({slug})
     apiResponse.sendSuccess(res , 200 , "category remove successfully" , removeCategory)
-})
+});

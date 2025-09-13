@@ -6,5 +6,6 @@ const upload = require('../../middleware/multer.middleware');
 _.route("/add-brand").post(upload.fields([{name: "image" , maxCount: 1}]), brandController.registerBrand);
 _.route("/all-brand").get(brandController.findAllBrand);
 _.route("/get-single-Brand/:slug").get(brandController.getBrandBySlug);
+_.route("/modify-brand/:slug").put(upload.fields([{name: "image" , maxCount: 1}]),brandController.modifyCategory);
 
 module.exports = _;
