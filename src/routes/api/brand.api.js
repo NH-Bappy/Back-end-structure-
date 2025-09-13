@@ -7,5 +7,6 @@ _.route("/add-brand").post(upload.fields([{name: "image" , maxCount: 1}]), brand
 _.route("/all-brand").get(brandController.findAllBrand);
 _.route("/get-single-Brand/:slug").get(brandController.getBrandBySlug);
 _.route("/modify-brand/:slug").put(upload.fields([{name: "image" , maxCount: 1}]),brandController.modifyCategory);
+_.route("/remove-item/:slug").delete(brandController.removeBrand);
 
 module.exports = _;

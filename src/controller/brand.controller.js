@@ -1,4 +1,4 @@
-const { uploadFileInCloudinary } = require('../helpers/cloudinary');
+const { uploadFileInCloudinary, removeCloudinaryFile } = require('../helpers/cloudinary');
 const brandModel = require('../models/brand.model');
 const { apiResponse } = require('../utils/apiResponse');
 const { asyncHandler } = require('../utils/asyncHandler');
@@ -64,17 +64,22 @@ exports.modifyCategory = asyncHandler(async (req, res) => {
 
 //@desc delete category from data base
 
-exports.removeCategory = asyncHandler(async (req ,res) => {
+exports.removeBrand = asyncHandler(async (req,res) => {
     const { slug } = req.params;
     if (!slug) throw new CustomError(401, " The slug does not match");
     const brandModelFind = await brandModel.findOne({ slug });
     if (!brandModelFind) throw new CustomError(500, "brand data not found");
     if (req?.files?.image) {
-        const splitLink = category.image.split('/');
-        const lastPart = splitLink[splitLink.length - 1]
-        const removeImage = await removeCloudinaryFile(lastPart.split('?')[0]);
-        if (removeImage !== "ok") throw new CustomError(401, "image not deleted");
+        // upload image
+        // console.log(req?.files?.image)
+        const parts = brandModelFind.image.split('/');
+        // console.log(parts);
+        const publicId = parts[parts.length - 1];
+        // console.log(publicId);
+        // console.log(publicId.split("?")[0]);
+        const result = await removeCloudinaryFile(publicId.split("?")[0]);
+        if (result !== "ok") throw new CustomError(401, "image not deleted")
     }
-    const removeCategory = await brandModel.findOneAndDelete({ slug })
-    apiResponse.sendSuccess(res, 200, "brand remove successfully", removeCategory)
+    const removeBrand = await brandModel.findOneAndDelete({ slug })
+    apiResponse.sendSuccess(res, 200, "brand remove successfully", removeBrand)
 });
