@@ -1,13 +1,12 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-const { apiResponse } = require("../utils/apiResponse");
 const { asyncHandler } = require("../utils/asyncHandler");
 const { CustomError } = require("../utils/customError");
 const { required, ref, boolean, exist } = require('joi');
 const slugify = require('slugify')
 
-const categorySchema = new mongoose.Schema({
+const categorySchema = new Schema({
     name: {
         type: String,
         required: true,
