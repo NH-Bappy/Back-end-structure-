@@ -69,17 +69,23 @@ exports.removeBrand = asyncHandler(async (req,res) => {
     if (!slug) throw new CustomError(401, " The slug does not match");
     const brandModelFind = await brandModel.findOne({ slug });
     if (!brandModelFind) throw new CustomError(500, "brand data not found");
-    if (req?.files?.image) {
+    if (brandModelFind.image) {
         // upload image
-        // console.log(req?.files?.image)
+        // console.log(brandModelFind.image)
+        // return
         const parts = brandModelFind.image.split('/');
         // console.log(parts);
+        // return
         const publicId = parts[parts.length - 1];
+
         // console.log(publicId);
+        
+        // return
         // console.log(publicId.split("?")[0]);
+        // return
         const result = await removeCloudinaryFile(publicId.split("?")[0]);
         if (result !== "ok") throw new CustomError(401, "image not deleted")
     }
     const removeBrand = await brandModel.findOneAndDelete({ slug })
-    apiResponse.sendSuccess(res, 200, "brand remove successfully", removeBrand)
+    apiResponse.sendSuccess(res, 200, "brand remove successfully",removeBrand)
 });

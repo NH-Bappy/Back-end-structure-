@@ -66,7 +66,7 @@ exports.removeCategory = asyncHandler(async (req ,res) => {
     if(!slug) throw new CustomError(401 , "slug is missing");
     const category = await categoryModel.findOne({slug});
     if(!category) throw new CustomError(500 , "category not found");
-    if(req?.files?.image){
+    if(category.image){
         const splitLink = category.image.split('/');
         const lastPart = splitLink[splitLink.length -1]
         const removeImage = await removeCloudinaryFile(lastPart.split('?')[0]);
