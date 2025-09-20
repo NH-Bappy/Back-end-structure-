@@ -83,20 +83,19 @@ const discountValidationSchema = Joi.object({
         }),
 
     isActive: Joi.boolean().optional().default(true),
-}, 
-{ allowUnknown: true }) // allow extra fields
-    // Rule: Either discountValueByAmount OR discountValueByPercentage
-    .xor("discountValueByAmount", "discountValueByPercentage");
+}, // allow extra fields
+{ allowUnknown: true })//.xor("discountValueByAmount", "discountValueByPercentage");// Rule: Either discountValueByAmount OR discountValueByPercentage
+
+
 
 // Export validation function
 exports.validateDiscount = (req) => {
-    const { error, value } = discountValidationSchema.validate(req.body, {
-        abortEarly: true, // stop at first error
+    const { error, value } = discountValidationSchema.validate(req.body, { //validate(data, options) → this method checks if the provided data (in your case req.body) follows the schema rules.
+        abortEarly: true, // stop at first error It controls whether Joi should stop at the first error it finds, or collect all errors.
     });
     if (error) {
         console.log("Validation error:", error.details[0].message);
         throw new CustomError(401, error.details[0].message);
     }
-
     return value;
 };

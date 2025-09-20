@@ -9,16 +9,35 @@ const categoryModel = require('../models/category.model');
 
 
 //@desc create subcategory
-exports.createNewSubCategory = asyncHandler(async (req ,res) => {
+exports.createNewSubCategory = asyncHandler(async (req, res) => {
     const value = await validateSubcategory(req);
     // console.log(value);
+
     // Create a new subcategory document in the database using the validated values
-    const subcategoryObject = await subCategoryModel.create(value); //where we find the new whole object
-    // console.log(subcategory)
-    await categoryModel.findByIdAndUpdate({_id: value.category}, {$push: {subCategory: subcategoryObject._id}} , {new: true})
-    if (!subcategoryObject) throw new CustomError(401 , "please try again creating subcategory");
-    apiResponse.sendSuccess(res , 200 , "Successfully created a new subcategory", subcategoryObject);
+    const subcategoryObject = await subCategoryModel.create(value); // newly created subcategory object
+
+
+    //is used to maintain the relationship between Category and Subcategory.
+    // Update the parent category:
+    // - Find the category by its _id (value.category comes from the request body)
+    // - Push the new subcategory's _id into the category's subCategory array
+    // - { new: true } ensures the updated category doc is returned (good practice)
+    await categoryModel.findByIdAndUpdate(
+        { _id: value.category },
+        { $push: { subCategory: subcategoryObject._id } },
+        { new: true }
+    );
+
+    if (!subcategoryObject) throw new CustomError(401, "please try again creating subcategory");
+
+    apiResponse.sendSuccess(
+        res,
+        200,
+        "Successfully created a new subcategory",
+        subcategoryObject
+    );
 });
+
 
 //@desc show all the category
 exports.findAllSubcategories = asyncHandler(async(req ,res) => {

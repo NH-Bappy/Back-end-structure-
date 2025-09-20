@@ -15,7 +15,7 @@ app.use(cors({origin: ["http://localhost:4000"]})) //kaon server ke  data dibo k
 
 // routes
 
-app.use('/api/v1' , require('./src/routes/api/index.api'))
+app.use('/api/v1' , require('./src/routes/index.api'))
 
 
 
