@@ -54,4 +54,16 @@ exports.getAllDiscount = asyncHandler(async(req , res) => {
     .sort({createdAt: -1});
     if(!findAllDiscount) throw new CustomError(400 , "Discount not available.");
     apiResponse.sendSuccess(res , 200 , "All discounts retrieved successfully" , findAllDiscount);
-})
+});
+
+//@desc get single discount
+
+exports.findOneDiscount = asyncHandler(async (req ,res) => {
+    const {slug} = req.params;
+    if(!slug) throw new CustomError(401 , " The slug does not match");
+    const singleDiscount = await discountModel.findOne({slug})
+    .populate("targetCategory")
+    .populate("targetSubcategory");
+    if(!singleDiscount) throw new CustomError(400 , "Discount not available.");
+    apiResponse.sendSuccess(res , 200 , "single discounts retrieved successfully" , singleDiscount);
+});
