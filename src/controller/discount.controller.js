@@ -46,3 +46,12 @@ exports.newDiscountCreate = asyncHandler(async (req, res) => {
 });
 
 //@desc get all discount
+
+exports.getAllDiscount = asyncHandler(async(req , res) => {
+    const findAllDiscount = await discountModel.find()
+    .populate("targetCategory")
+    .populate("targetSubcategory")
+    .sort({createdAt: -1});
+    if(!findAllDiscount) throw new CustomError(400 , "Discount not available.");
+    apiResponse.sendSuccess(res , 200 , "All discounts retrieved successfully" , findAllDiscount);
+})

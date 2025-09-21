@@ -39,14 +39,14 @@ exports.createNewSubCategory = asyncHandler(async (req, res) => {
 });
 
 
-//@desc show all the category
+//@desc show all the subcategory
 exports.findAllSubcategories = asyncHandler(async(req ,res) => {
-    const allSubcategory = await subCategoryModel.find().populate("category").sort({createdAt: -1})
+    const allSubcategory = await subCategoryModel.find().populate("category discount").sort({createdAt: -1})
     if(!allSubcategory) throw new CustomError(401 , "subcategory not found");
     apiResponse.sendSuccess(res , 200 ,"successfully found all the subcategory" , allSubcategory);
 });
 
-//@desc find a specific category using slug
+//@desc find a specific subcategory using slug
 exports.getSubcategoryBySlug = asyncHandler(async(req ,res) => {
     const {slug} = req.params;
     if(!slug) throw new CustomError(401 , " The slug does not match");

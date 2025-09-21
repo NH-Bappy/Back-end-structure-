@@ -54,7 +54,7 @@ const discountSchema = new Schema({
     },
     targetSubcategory: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'subcategory'
+        ref: 'subCategory'
     },
     isActive: {
         type: Boolean,
