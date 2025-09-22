@@ -47,23 +47,91 @@ exports.newDiscountCreate = asyncHandler(async (req, res) => {
 
 //@desc get all discount
 
-exports.getAllDiscount = asyncHandler(async(req , res) => {
+exports.getAllDiscount = asyncHandler(async (req, res) => {
     const findAllDiscount = await discountModel.find()
-    .populate("targetCategory")
-    .populate("targetSubcategory")
-    .sort({createdAt: -1});
-    if(!findAllDiscount) throw new CustomError(400 , "Discount not available.");
-    apiResponse.sendSuccess(res , 200 , "All discounts retrieved successfully" , findAllDiscount);
+        .populate("targetCategory")
+        .populate("targetSubcategory")
+        .sort({ createdAt: -1 });
+    if (!findAllDiscount) throw new CustomError(400, "Discount not available.");
+    apiResponse.sendSuccess(res, 200, "All discounts retrieved successfully", findAllDiscount);
 });
 
 //@desc get single discount
 
-exports.findOneDiscount = asyncHandler(async (req ,res) => {
-    const {slug} = req.params;
-    if(!slug) throw new CustomError(401 , " The slug does not match");
-    const singleDiscount = await discountModel.findOne({slug})
-    .populate("targetCategory")
-    .populate("targetSubcategory");
-    if(!singleDiscount) throw new CustomError(400 , "Discount not available.");
-    apiResponse.sendSuccess(res , 200 , "single discounts retrieved successfully" , singleDiscount);
+exports.findOneDiscount = asyncHandler(async (req, res) => {
+    const { slug } = req.params;
+    if (!slug) throw new CustomError(401, " The slug does not match");
+    const singleDiscount = await discountModel.findOne({ slug })
+        .populate("targetCategory")
+        .populate("targetSubcategory");
+    if (!singleDiscount) throw new CustomError(400, "Discount not available.");
+    apiResponse.sendSuccess(res, 200, "single discounts retrieved successfully", singleDiscount);
+});
+
+
+//@desc update discount
+exports.modifyDiscount = asyncHandler(async (req, res) => {
+    const { slug } = req.params;
+    if (!slug) throw new CustomError(401, " The slug does not match");
+
+    // Validate request body according to schema
+    const newData = await validateDiscount(req);
+
+    // Find current discount by slug
+    const currentDiscount = await discountModel.findOne({ slug });
+    if (!currentDiscount) throw new CustomError(400, "old discount not found");
+
+    // Update discount document with new data
+    // - new: true => return updated document
+    // - runValidators: true => enforce schema rules
+    const discountAfterUpdate = await discountModel.findOneAndUpdate(
+        { slug },
+        newData,
+        { new: true, runValidators: true }
+    );
+    if (!discountAfterUpdate) throw new CustomError(400, "failed to update discount");
+
+    // Store updated discount ID for reference updates
+    const discountId = discountAfterUpdate._id;
+
+    // === Handle category plan updates ===
+    if (
+        currentDiscount.discountPlan === "category" &&
+        currentDiscount.targetCategory?.toString() !==
+        discountAfterUpdate.targetCategory?.toString()
+    ) {
+        // Remove discount from old category
+        await categoryModel.findByIdAndUpdate(
+            currentDiscount.targetCategory,
+            { $pull: { discount: discountId } }
+        );
+
+        // Add discount to new category
+        await categoryModel.findByIdAndUpdate(
+            discountAfterUpdate.targetCategory,
+            { $addToSet: { discount: discountId } } // avoids duplicates
+        );
+    }
+
+    // === Handle subcategory plan updates ===
+    if (
+        currentDiscount.discountPlan === "subcategory" &&
+        currentDiscount.targetSubcategory?.toString() !==
+        discountAfterUpdate.targetSubcategory?.toString()
+    ) {
+        // Remove discount from old subcategory
+        await subCategoryModel.findByIdAndUpdate(
+            currentDiscount.targetSubcategory,
+            { $pull: { discount: discountId } }
+        );
+
+        // Add discount to new subcategory
+        await subCategoryModel.findByIdAndUpdate(
+            discountAfterUpdate.targetSubcategory,
+            { $addToSet: { discount: discountId } }
+        );
+    }
+
+    // Send success response with updated discount data
+    apiResponse.sendSuccess(res, 200, "discount update successfully", discountAfterUpdate);
 });
