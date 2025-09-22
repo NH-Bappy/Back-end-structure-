@@ -8,5 +8,6 @@ _.route("/create-discount").post(discountController.newDiscountCreate);
 _.route("/find-all-discount").get(discountController.getAllDiscount);
 _.route("/find-one-discount/:slug").get(discountController.findOneDiscount);
 _.route("/modify-discount/:slug").put(discountController.modifyDiscount);
+_.route("/remove-discount/:slug").delete(discountController.removeDiscount);
 
 module.exports = _;
