@@ -1,4 +1,3 @@
-require('dotenv').config();
 const mongoose = require('mongoose');
 const { default: slugify } = require('slugify');
 const { CustomError } = require('../utils/customError');

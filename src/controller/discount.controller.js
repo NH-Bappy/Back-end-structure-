@@ -138,31 +138,31 @@ exports.modifyDiscount = asyncHandler(async (req, res) => {
 
 
 //@ delete discount
-exports.removeDiscount = asyncHandler(async (req ,res) => {
-    const {slug} = req.params;
+exports.removeDiscount = asyncHandler(async (req, res) => {
+    const { slug } = req.params;
     if (!slug) throw new CustomError(401, " The slug does not match");
 
     // Find the discount first
-    const discountObject = await discountModel.findOne({slug});
-    if(!discountObject) throw new CustomError(400 , "failed to find discount");
+    const discountObject = await discountModel.findOne({ slug });
+    if (!discountObject) throw new CustomError(400, "failed to find discount");
     console.log(discountObject)
 
 
     const discountId = discountObject._id
 
     // Remove discount reference from category
-    if(discountObject.discountPlan === "category"){
-        await categoryModel.findByIdAndUpdate(discountObject.targetCategory , {$pull: {discount:discountId}})
+    if (discountObject.discountPlan === "category") {
+        await categoryModel.findByIdAndUpdate(discountObject.targetCategory, { $pull: { discount: discountId } })
     };
 
     // Remove discount reference from subcategory
-    if(discountObject.discountPlan == "subcategory"){
-        await subCategoryModel.findByIdAndUpdate(discountObject.targetSubcategory , {$pull : {discount:discountId}})
+    if (discountObject.discountPlan == "subcategory") {
+        await subCategoryModel.findByIdAndUpdate(discountObject.targetSubcategory, { $pull: { discount: discountId } })
     };
 
     // delete the discount
     const discountDelete = await discountModel.deleteOne(discountId)
 
-    apiResponse.sendSuccess(res , 200 , "delete discount successfully" , discountDelete)
+    apiResponse.sendSuccess(res, 200, "delete discount successfully", discountDelete);
 
 });
