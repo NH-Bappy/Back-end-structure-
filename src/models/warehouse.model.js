@@ -1,29 +1,27 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-
-
+const { CustomError } = require('../utils/customError');
 
 const warehouseSchema = new Schema({
     wareHouseName: {
         type: String,
-        required: [true, "warehouse name required !! "],
+        required: [true, "Warehouse name required!!"],
         trim: true,
+        unique: true,  // DB-level uniqueness
     },
-
     warehouseLocation: {
         type: String,
         required: true,
+        trim: true,
     },
-},
-    { timestamps: true }
-);
+}, { timestamps: true });
 
-// Ensure unique slug
+// Ensure unique name at application level
 warehouseSchema.pre("save", async function (next) {
     try {
-        const wareHouseNameExist = await this.constructor.findOne({ wareHouseNameExist: this.wareHouseNameExist });
-        if (wareHouseNameExist && wareHouseNameExist._id.toString() !== this._id.toString()) {
-            throw new CustomError(409, "wareHouse name already exists");
+        const existingWarehouse = await this.constructor.findOne({ wareHouseName: this.wareHouseName });
+        if (existingWarehouse && existingWarehouse._id.toString() !== this._id.toString()) {
+            throw new CustomError(409, "Warehouse name already exists");
         }
         next();
     } catch (error) {
@@ -31,5 +29,4 @@ warehouseSchema.pre("save", async function (next) {
     }
 });
 
-
-module.exports = mongoose.model("warehouseLocation" , warehouseSchema);
+module.exports = mongoose.model("Warehouse", warehouseSchema);
