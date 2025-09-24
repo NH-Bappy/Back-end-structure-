@@ -11,7 +11,11 @@ const productSchema = new Schema({
     },
     description: { type: String, trim: true },
     slug: { type: String, unique: true },
-    category: { type: mongoose.Schema.Types.ObjectId, ref: "category" },
+    category: { 
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "category",
+        required:true,
+    },
     subcategory: { type: mongoose.Schema.Types.ObjectId, ref: "subCategory" },
     brand: { type: mongoose.Schema.Types.ObjectId, ref: "brand" },
     variant: { type: mongoose.Schema.Types.ObjectId, ref: "variant" },
