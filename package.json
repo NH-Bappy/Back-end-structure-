@@ -12,6 +12,7 @@
   "description": "",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "bwip-js": "^4.7.0",
     "cloudinary": "^2.7.0",
     "cookie": "^1.0.2",
     "cookie-parser": "^1.4.7",
@@ -25,6 +26,7 @@
     "multer": "^2.0.2",
     "nodemailer": "^7.0.6",
     "nodemon": "^3.1.10",
+    "qrcode": "^1.5.0",
     "slugify": "^1.6.6"
   }
 }

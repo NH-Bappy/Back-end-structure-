@@ -17,6 +17,11 @@ const productValidationSchema = Joi.object({
         "string.length": "Invalid category ID.",
         "any.required": "Category is required.",
     }),
+    description: Joi.string().allow("", null),
+    category: Joi.string().hex().length(24).required().messages({
+        "string.length": "Invalid category ID.",
+        "any.required": "Category is required.",
+    }),
     subCategory: Joi.custom(isValidObjectId).allow(null, ""),
     brand: Joi.custom(isValidObjectId).allow(null, ""),
     variant: Joi.custom(isValidObjectId).allow(null, ""),
@@ -36,11 +41,11 @@ const productValidationSchema = Joi.object({
     }),
     QrCode: Joi.string().allow("", null),
     barCode: Joi.string().allow("", null),
-    groupUnit: Joi.string().valid("Box", "Packet", "Dozen", "Custom").allow("", null),
+    groupUnit: Joi.string().valid("Box", "Packet", "Dozen", "Custom"),
     groupUnitQuantity: Joi.number().allow(null).optional(),
     unit: Joi.string()
         .valid("Piece", "Kg", "Gram", "Packet", "Custom")
-        .allow("", null),
+        .required(),
     variantType: Joi.string()
         .valid("singleVariant", "multipleVariant")
         .required(),
