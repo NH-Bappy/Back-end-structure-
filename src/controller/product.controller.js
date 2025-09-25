@@ -43,11 +43,20 @@ exports.CreateNewProduct = asyncHandler(async(req ,res) => {
 });
 
 
-//@ get all product
+//@desc get all product
 
 exports.showAllProduct = asyncHandler(async (req , res) => {
     const findAllProduct = await productModel.find({}).populate({path : "category subCategory Brand discount",}).sort({createdAt: -1 });
     if(!findAllProduct.length) throw new CustomError(400 , "find product failed");
     apiResponse.sendSuccess(res ,200 ,"all product found successfully" , findAllProduct);
+});
+
+//@desc get single product
+exports.findSingleProduct = asyncHandler(async (req, res) => {
+    const {slug} = req.params;
+    if(!slug) throw new CustomError(400 , "slug is missing");
+    const singleProduct = await productModel.findOne({slug}).populate({path : "category subCategory Brand discount",});
+    if(!singleProduct) throw new CustomError(400 , "single product not found");
+    apiResponse.sendSuccess(res , 200 , "single found successfully" ,singleProduct)
 })
 
