@@ -23,7 +23,7 @@ const productValidationSchema = Joi.object({
         "any.required": "Category is required.",
     }),
     subCategory: Joi.custom(isValidObjectId).allow(null, ""),
-    brand: Joi.custom(isValidObjectId).allow(null, ""),
+    Brand: Joi.custom(isValidObjectId).allow(null, ""),
     variant: Joi.custom(isValidObjectId).allow(null, ""),
     discount: Joi.custom(isValidObjectId).allow(null, ""),
     manufactureCountry: Joi.string().allow("", null),
