@@ -12,6 +12,7 @@ _.route("/find-Single-Product/:slug").get(productController.findSingleProduct);
 _.route("/update-product-info/:slug").put(productController.updateProductInformation);
 _.route("/upload-product-image/:slug").put(upload.fields([{name:"image" ,maxCount:10}]),productController.updateProductImage);
 _.route("/product-image-delete/:slug").delete(productController.deleteProductImage);
+_.route("/product-delete/:slug").delete(productController.deleteProduct);
 
 
 module.exports = _;

@@ -90,7 +90,7 @@ exports.updateProductImage = asyncHandler(async (req, res) => {
 
 });
 
-//@desc delete product image
+//@desc [update] delete product image
 exports.deleteProductImage = asyncHandler(async (req, res) => {
     const { slug } = req.params;
     const {imageId} = req.body;
@@ -109,3 +109,22 @@ exports.deleteProductImage = asyncHandler(async (req, res) => {
     await productObject.save();
     apiResponse.sendSuccess(res, 200, "image delete successfully", productObject);
 });
+
+//@delete product
+exports.deleteProduct = asyncHandler(async (req ,res) => {
+    const { slug } = req.params;
+    if (!slug) throw new CustomError(400, "slug is missing");
+
+    const productObject = await productModel.findOne({slug});
+    if (!productObject) throw new CustomError(400, "The product you are looking for does not exist");
+
+    for(let singleImage of productObject.image){
+    const public_id = getPublicId(singleImage);
+    await removeCloudinaryFile(public_id);
+    }
+
+    const deleteProduct = await productModel.findOneAndDelete({slug});
+    if (!deleteProduct) throw new CustomError(400, "The product you are looking for does not exist");
+
+    apiResponse.sendSuccess(res , 200 , "product deleted successfully" , deleteProduct)
+})
