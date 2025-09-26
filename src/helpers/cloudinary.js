@@ -47,4 +47,17 @@ exports.removeCloudinaryFile = async(publicId) => {
         console.log("error from cloudinary file delete" ,error);
         throw new CustomError(400 ,error.message)
     }
-}
+};
+
+//@desc extract public Id
+exports.getPublicId = (imageUrl) => {
+    const parts = imageUrl.split("/")
+    // console.log(parts)
+    // return
+    const cloudinaryPublicUrl = parts[parts.length -1 ];
+    // console.log(cloudinaryPublicUrl) 
+    // console.log(cloudinaryPublicUrl.split('?')[0]);
+    return cloudinaryPublicUrl.split('?')[0];
+};
+
+
