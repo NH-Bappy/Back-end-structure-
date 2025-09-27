@@ -93,7 +93,7 @@ exports.updateProductImage = asyncHandler(async (req, res) => {
 //@desc [update] delete product image
 exports.deleteProductImage = asyncHandler(async (req, res) => {
     const { slug } = req.params;
-    const {imageId} = req.body;
+    const { imageId } = req.body;
     if (!slug && !imageId.length) throw new CustomError(400, "slug and imageId is missing");
     // console.log(imageId);
     // getPublicId(imageId)
@@ -111,20 +111,53 @@ exports.deleteProductImage = asyncHandler(async (req, res) => {
 });
 
 //@delete product
-exports.deleteProduct = asyncHandler(async (req ,res) => {
+exports.deleteProduct = asyncHandler(async (req, res) => {
     const { slug } = req.params;
     if (!slug) throw new CustomError(400, "slug is missing");
 
-    const productObject = await productModel.findOne({slug});
+    const productObject = await productModel.findOne({ slug });
     if (!productObject) throw new CustomError(400, "The product you are looking for does not exist");
 
-    for(let singleImage of productObject.image){
-    const public_id = getPublicId(singleImage);
-    await removeCloudinaryFile(public_id);
+    for (let singleImage of productObject.image) {
+        const public_id = getPublicId(singleImage);
+        await removeCloudinaryFile(public_id);
     }
 
-    const deleteProduct = await productModel.findOneAndDelete({slug});
+    const deleteProduct = await productModel.findOneAndDelete({ slug });
     if (!deleteProduct) throw new CustomError(400, "The product you are looking for does not exist");
 
-    apiResponse.sendSuccess(res , 200 , "product deleted successfully" , deleteProduct)
-})
+    apiResponse.sendSuccess(res, 200, "product deleted successfully", deleteProduct);
+});
+
+//@desc search product  with query;
+exports.searchProductWithQuery = asyncHandler(async (req, res) => {
+    // console.log(req.query);
+    const { category, subCategory, Brand, tag } = req.query;
+    const query = {};
+    if (category) {
+        query.category = category;
+    }
+    if (subCategory) {
+        query.subCategory = subCategory;
+    }
+    if (Brand) {
+        if (Array.isArray(Brand)) {
+            query.Brand = { $in: Brand };//Special handling for Brand: if multiple brands are passed, it uses $in for matching any of them
+        } else {
+            query.Brand = Brand;
+        }
+    }
+    if (tag) {
+        if (Array.isArray(tag)) {
+            query.tag = { $in: tag };//Special handling for Brand: if multiple brands are passed, it uses $in for matching any of them
+        } else {
+            query.tag = tag;
+        }
+    }
+
+    const productQuery = await productModel.find(query).populate("category subCategory Brand");
+    if (!productQuery.length) {
+        throw new CustomError(400, "The product you are looking for does not exist")
+    };
+    apiResponse.sendSuccess(res, 200, "found the item successfully", productQuery)
+});
