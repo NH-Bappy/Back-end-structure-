@@ -161,3 +161,20 @@ exports.searchProductWithQuery = asyncHandler(async (req, res) => {
     };
     apiResponse.sendSuccess(res, 200, "found the item successfully", productQuery)
 });
+
+// product page pagination
+exports.productPagePagination = asyncHandler(async (req, res) => {
+    const { page, item } = req.query;
+    const PageNumber = parseInt(page ,10);
+    const itemNumber = parseInt(item , 10);
+    if (!PageNumber || !itemNumber)
+    throw new CustomError(401, "pageNumber or item number not found!");
+     const skip = (PageNumber - 1) * itemNumber;
+     const allProduct = await productModel.countDocuments();
+     const totalPage = Math.round(allProduct /item);
+
+    const productObject = await productModel.find().skip(skip).limit(itemNumber).populate("category subCategory Brand");
+  if (!productObject || productObject.length === 0)
+    throw new CustomError(401, "product not found !! ");
+    apiResponse.sendSuccess(res, 200, "found the item successfully", {...productObject ,totalPage ,allProduct});
+});

@@ -14,6 +14,7 @@ _.route("/upload-product-image/:slug").put(upload.fields([{name:"image" ,maxCoun
 _.route("/product-image-delete/:slug").delete(productController.deleteProductImage);
 _.route("/product-delete/:slug").delete(productController.deleteProduct);
 _.route("/search-product").get(productController.searchProductWithQuery);
+_.route("/product-pagination").get(productController.productPagePagination);
 
 
 module.exports = _;
