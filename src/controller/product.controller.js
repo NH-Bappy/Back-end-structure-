@@ -214,3 +214,22 @@ exports.priceRangeSearch = asyncHandler(async (req, res) => {
     apiResponse.sendSuccess(res, 200, "product found successfully ", productObject);
 });
 
+// search product order
+exports.productOrder = asyncHandler(async(req ,res) => {
+    const {sort_by} = req.query;
+    if(!sort_by) throw new CustomError(401 , "query is missing");
+    let sortQuery = {};
+    if(sort_by == "date-descending"){
+        sortQuery = {createdAt: - 1};
+    }else if(sort_by == "date-ascending"){
+        sortQuery = {createdAt: 1};
+    }else if(sort_by == ""){
+        sortQuery = {createdAt: -1};
+    }
+
+
+
+    const productObject = await productModel.find({}).sort(sortQuery);
+    if(!productObject.length) throw new CustomError(401 , "there is no product to find");
+    apiResponse.sendSuccess(res ,200 ,"successfully find all product" productObject)
+});
