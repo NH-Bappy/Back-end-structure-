@@ -155,7 +155,7 @@ exports.searchProductWithQuery = asyncHandler(async (req, res) => {
         }
     }
 
-    const productQuery = await productModel.find(query).populate("category subCategory Brand");
+    const productQuery = await productModel.find(query).populate({ path: "category subCategory Brand", });
     if (!productQuery.length) {
         throw new CustomError(400, "The product you are looking for does not exist")
     };
@@ -165,16 +165,52 @@ exports.searchProductWithQuery = asyncHandler(async (req, res) => {
 // product page pagination
 exports.productPagePagination = asyncHandler(async (req, res) => {
     const { page, item } = req.query;
-    const PageNumber = parseInt(page ,10);
-    const itemNumber = parseInt(item , 10);
+    const PageNumber = parseInt(page, 10);
+    const itemNumber = parseInt(item, 10);
     if (!PageNumber || !itemNumber)
-    throw new CustomError(401, "pageNumber or item number not found!");
-     const skip = (PageNumber - 1) * itemNumber;
-     const allProduct = await productModel.countDocuments();
-     const totalPage = Math.round(allProduct /item);
+        throw new CustomError(401, "pageNumber or item number not found!");
+    const skip = (PageNumber - 1) * itemNumber;
+    const allProduct = await productModel.countDocuments();
+    const totalPage = Math.round(allProduct / item);
 
-    const productObject = await productModel.find().skip(skip).limit(itemNumber).populate("category subCategory Brand");
-  if (!productObject || productObject.length === 0)
-    throw new CustomError(401, "product not found !! ");
-    apiResponse.sendSuccess(res, 200, "found the item successfully", {...productObject ,totalPage ,allProduct});
+    const productObject = await productModel.find().skip(skip).limit(itemNumber).populate({ path: "category subCategory Brand", });
+    if (!productObject || productObject.length === 0)
+        throw new CustomError(401, "product not found !! ");
+    apiResponse.sendSuccess(res, 200, "found the item successfully", { ...productObject, totalPage, allProduct });
 });
+
+//@desc search with price range minimum and maximum api
+exports.priceRangeSearch = asyncHandler(async (req, res) => {
+    const { minimumPrice, maximumPrice } = req.query;
+    // console.log(minimumPrice, maximumPrice)
+    // return
+
+    if (!minimumPrice && !maximumPrice) {
+        throw new CustomError(401, "missing minimum Price and maximum price")
+    };
+
+    // Convert query params (string) to numbers
+    const min = minimumPrice ? Number(minimumPrice) : null;
+    const max = maximumPrice ? Number(maximumPrice) : null;
+
+    // $gte = greater than or equal to
+    // $lte = less than or equal to
+    let query;
+    if (min && max) {
+        query = { $gte: min, $lte: max };
+    } else if (min) {
+        query = { $gte: min }
+    } else if (max) {
+        query = { $lte: max }
+    };
+
+    // const productObject = await productModel.find({ retailPrice: { $gte: min, $lte: max } });
+    const productObject = await productModel
+        .find({ retailPrice: query })
+        .populate({ path: "category subCategory Brand", })
+        .sort({ createdAt: -1 });
+
+    if (!productObject.length) throw new CustomError(401, "Product not found !!");
+    apiResponse.sendSuccess(res, 200, "product found successfully ", productObject);
+});
+
