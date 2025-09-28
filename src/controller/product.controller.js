@@ -223,11 +223,17 @@ exports.productOrder = asyncHandler(async(req ,res) => {
         sortQuery = {createdAt: - 1};
     }else if(sort_by == "date-ascending"){
         sortQuery = {createdAt: 1};
-    }else if(sort_by == ""){
-        sortQuery = {createdAt: -1};
+    }else if(sort_by == "price-descending"){
+        sortQuery = {retailPrice: - 1};
+    }else if (sort_by == "price-ascending"){
+        sortQuery = {createdAt: 1};
+    }else if(sort_by == "name-descending"){
+        sortQuery = {name: -1};
+    }else if(sort_by == "name-ascending"){
+        sortQuery = {name: 1};
+    }else{
+        sortQuery = {};
     }
-
-
 
     const productObject = await productModel.find({}).sort(sortQuery);
     if(!productObject.length) throw new CustomError(401 , "there is no product to find");
