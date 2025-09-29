@@ -215,27 +215,80 @@ exports.priceRangeSearch = asyncHandler(async (req, res) => {
 });
 
 // search product order
-exports.productOrder = asyncHandler(async(req ,res) => {
-    const {sort_by} = req.query;
-    if(!sort_by) throw new CustomError(401 , "query is missing");
+exports.getSortedProducts = asyncHandler(async (req, res) => {
+    const { sort_by } = req.query;
+
+    // If query is missing, throw error
+    if (!sort_by) throw new CustomError(400, "query is missing");
+
     let sortQuery = {};
-    if(sort_by == "date-descending"){
-        sortQuery = {createdAt: - 1};
-    }else if(sort_by == "date-ascending"){
-        sortQuery = {createdAt: 1};
-    }else if(sort_by == "price-descending"){
-        sortQuery = {retailPrice: - 1};
-    }else if (sort_by == "price-ascending"){
-        sortQuery = {createdAt: 1};
-    }else if(sort_by == "name-descending"){
-        sortQuery = {name: -1};
-    }else if(sort_by == "name-ascending"){
-        sortQuery = {name: 1};
-    }else{
-        sortQuery = {};
+
+    // Handle different sorting options
+    if (sort_by === "date-descending") {
+        // Newest first
+        sortQuery = { createdAt: -1 };
+    } else if (sort_by === "date-ascending") {
+        // Oldest first
+        sortQuery = { createdAt: 1 };
+    } else if (sort_by === "price-descending") {
+        // Highest price first
+        sortQuery = { retailPrice: -1 };
+    } else if (sort_by === "price-ascending") {
+        // Lowest price first
+        sortQuery = { retailPrice: 1 }; //fixed from createdAt
+    } else if (sort_by === "name-descending") {
+        // Z → A
+        sortQuery = { name: -1 };
+    } else if (sort_by === "name-ascending") {
+        // A → Z
+        sortQuery = { name: 1 };
     }
 
+    // Fetch products from DB with sorting
     const productObject = await productModel.find({}).sort(sortQuery);
-    if(!productObject.length) throw new CustomError(401 , "there is no product to find");
-    apiResponse.sendSuccess(res ,200 ,"successfully find all product" productObject)
+
+    // If no products found, throw error
+    if (!productObject.length) throw new CustomError(404, "there is no product to find");
+    apiResponse.sendSuccess(
+        res,
+        200,
+        "successfully find all product",
+        productObject
+    );
+});
+
+
+//@desc product active or inactive
+// Controller to change a product's active/inactive state
+exports.changeProductState = asyncHandler(async (req, res) => {
+    // Extract slug and state from query parameters
+    // Example request: /api/v1/product/active-mode?slug=AppleSmartphone&state=inactive
+    const { slug, state } = req.query;
+
+    // Validate required query params (both slug and state must be provided)
+    if (!slug || !state) {
+        throw new CustomError(400, "slug or state is missing");
+    }
+
+    // Validate allowed state values (only "active" or "inactive" are acceptable)
+    if (!["active", "inactive"].includes(state)) {
+        throw new CustomError(400, "invalid state value, must be 'active' or 'inactive'");
+    }
+
+    // Try to find the product by its slug
+    const productObject = await productModel.findOne({ slug });
+    if (!productObject) {
+        throw new CustomError(404, "the product is missing");
+    }
+
+    // Update the product's isActive field based on the state
+    // If state === "active", set isActive = true
+    // If state === "inactive", set isActive = false
+    productObject.isActive = state === "active";
+
+    // Save changes to the database
+    await productObject.save();
+
+    // Send success response with updated product data
+    apiResponse.sendSuccess(res, 200, "successfully changed the state", productObject);
 });

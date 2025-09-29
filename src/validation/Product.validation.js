@@ -66,7 +66,7 @@ const productValidationSchema = Joi.object({
     alertQuantity: Joi.number().allow(null),
     stockAlert: Joi.boolean().allow(null),
     inStock: Joi.boolean().allow(null),
-    isActive: Joi.boolean().allow(null),
+    isActive: Joi.boolean().allow(null).default(true),
     minimumOrderQuantity: Joi.number().allow(null),
     tag: Joi.array().items(Joi.string()).allow(null),
     reviews: Joi.array().items(Joi.custom(isValidObjectId)).allow(null),

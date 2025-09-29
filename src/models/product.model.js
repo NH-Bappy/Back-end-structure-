@@ -55,7 +55,10 @@ const productSchema = new Schema({
     alertQuantity: Number,
     stockAlert: Boolean,
     inStock: Boolean,
-    isActive: Boolean,
+    isActive:{
+        type: Boolean,
+        default: true,
+    },
     minimumOrderQuantity: Number,
 }, { timestamps: true });
 
