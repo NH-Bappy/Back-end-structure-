@@ -30,3 +30,10 @@ exports.createNewVariant = asyncHandler(async (req ,res) => {
     if(!pushVariant) throw new CustomError(404 , "variant not updated into product");
     apiResponse.sendSuccess(res, 200, "variant create successfully" , variant);
 });
+
+//@desc find all variant
+exports.findAllVariant = asyncHandler(async (req ,res) => {
+    const findAll = await variantModel.find()//populate("product");
+    if(!findAll) throw new CustomError(404 , "something wrong with your request");
+    apiResponse.sendSuccess(res ,200 ,"successfully found all the variant" , findAll);
+});

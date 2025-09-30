@@ -4,7 +4,6 @@ const variantController = require('../../controller/variant-controller');
 const upload = require('../../middleware/multer.middleware');
 
 _.route("/create-new-variant").post(upload.fields([{name: "image" ,maxCount: 10}]) ,variantController.createNewVariant);
-
-
+_.route("/find-all").get(variantController.findAllVariant)
 
 module.exports = _;
