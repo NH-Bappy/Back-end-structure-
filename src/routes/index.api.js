@@ -9,6 +9,7 @@ _.use("/subcategory" , require('../routes/api/subCategory.api'));
 _.use("/brand" , require('../routes/api/brand.api'));
 _.use("/discount" , require('../routes/api/discount.api'));
 _.use("/product" ,require('../routes/api/product.api'));
+_.use("/variant" ,require('../routes/api/variant.api'));
 
 
 

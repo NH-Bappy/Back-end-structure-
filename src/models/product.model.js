@@ -11,14 +11,19 @@ const productSchema = new Schema({
     },
     description: { type: String, trim: true },
     slug: { type: String, unique: true },
-    category: { 
+    category: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "category",
-        required:true,
+        required: true,
     },
     subCategory: { type: mongoose.Schema.Types.ObjectId, ref: "subCategory" },
     Brand: { type: mongoose.Schema.Types.ObjectId, ref: "Brand" },
-    variant: { type: mongoose.Schema.Types.ObjectId, ref: "variant" },
+
+    variant: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "variant"
+    }],
+
     discount: { type: mongoose.Schema.Types.ObjectId, ref: "discount" },
     reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
     warehouseLocation: { type: mongoose.Schema.Types.ObjectId, ref: "Warehouse" },
@@ -55,7 +60,7 @@ const productSchema = new Schema({
     alertQuantity: Number,
     stockAlert: Boolean,
     inStock: Boolean,
-    isActive:{
+    isActive: {
         type: Boolean,
         default: true,
     },

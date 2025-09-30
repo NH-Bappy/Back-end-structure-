@@ -91,5 +91,5 @@ exports.validateVariant = async (req) => {
         console.error("Variant Validation Error:", error);
         throw new CustomError(401, error.details?.[0]?.message || error.message);
     }
-}
+};
 
