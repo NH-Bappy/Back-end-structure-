@@ -1,4 +1,4 @@
-const { uploadFileInCloudinary } = require('../helpers/cloudinary');
+const { uploadFileInCloudinary, removeCloudinaryFile, getPublicId } = require('../helpers/cloudinary');
 const variantModel = require('../models/variant.model');
 const { asyncHandler } = require('../utils/asyncHandler');
 const { CustomError } = require('../utils/customError');
@@ -45,6 +45,62 @@ exports.findOneVariant = asyncHandler(async (req, res) => {
     // console.log(slug);
     const singleVariant = await variantModel.findOne({}).populate("product");
     // console.log(singleVariant);
-    if(!singleVariant) throw new CustomError(404 , "variant not found");
-    apiResponse.sendSuccess(res , 200 , "variant found successfully" ,singleVariant);
+    if (!singleVariant) throw new CustomError(404, "variant not found");
+    apiResponse.sendSuccess(res, 200, "variant found successfully", singleVariant);
+});
+
+//desc update variant
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//@desc delete variant
+exports.deleteVariant = asyncHandler(async (req, res) => {
+    const { slug } = req.params;
+    // console.log(slug)
+    // return
+    if (!slug) throw new CustomError(400, "Slug is required");
+
+    const variantObject = await variantModel.findOne({slug});
+    // console.log(variantObject);
+    // return
+    if (!variantObject) throw new CustomError(404, "Variant not found");
+
+    // delete images
+    await Promise.all(
+        variantObject.image.map((singlePicture) => 
+            removeCloudinaryFile(getPublicId(singlePicture))
+        )
+    );
+
+    // delete variant
+    const deleteVariant = await variantModel.findOneAndDelete({ slug });
+    // console.log(deleteVariant)
+    // return
+    if (!deleteVariant) throw new CustomError(404, "Variant not found");
+
+    // update product
+    const updateProduct = await productModel.findOneAndUpdate(
+        { _id: deleteVariant.product },
+        { $pull: { variants: deleteVariant._id } },
+        { new: true }
+    );
+    if (!updateProduct) throw new CustomError(400, "Failed to update product");
+
+    apiResponse.sendSuccess(res, 200, "Variant has been deleted successfully", deleteVariant);
 });
