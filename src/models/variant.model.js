@@ -21,7 +21,6 @@ const variantSchema = new mongoose.Schema({
     },
     slug: {
         type: String,
-        unique: true,
     },
     size: {
         type: String,
@@ -70,7 +69,7 @@ variantSchema.pre("save", function (next) {   // Pre-save middleware runs before
         this.slug = slugify(this.name, {          // Generate slug from the "name" value
             replacement: "-",                     // Replace spaces with dashes
             lower: true,                          // Convert slug to lowercase
-            strict: true,                         // Remove special characters
+            strict: false,                         // Remove special characters
             trim: true,                           // Trim extra spaces from start/end
         });
     }
