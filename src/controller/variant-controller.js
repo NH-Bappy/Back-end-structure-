@@ -49,9 +49,19 @@ exports.findOneVariant = asyncHandler(async (req, res) => {
     apiResponse.sendSuccess(res, 200, "variant found successfully", singleVariant);
 });
 
-//desc update variant
 
 
+
+
+
+
+//@desc update variant
+
+exports.updateVariantInformation = asyncHandler(async(req , res) => {
+    const {slug} = req.params;
+    if(!slug) throw new CustomError(401, "slug is missing");
+
+});
 
 
 
