@@ -99,7 +99,7 @@ exports.deleteProductImage = asyncHandler(async (req, res) => {
     // getPublicId(imageId)
     // return
     const productObject = await productModel.findOne({ slug });
-    if (!productObject) throw new CustomError(400, "The product you are looking for does not exist");
+    if (!productObject) throw new CustomError(404, "The product you are looking for does not exist");
     // console.log(imageId);
     const deleteImage = productObject.image.filter((img) => img !== imageId);
     // console.log(deleteImage)

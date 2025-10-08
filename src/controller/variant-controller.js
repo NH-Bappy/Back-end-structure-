@@ -104,9 +104,9 @@ exports.updateVariantImage = asyncHandler(async (req, res) => {
 
     const variantObject = await variantModel.findOne({ slug });
     if (!variantObject) throw new CustomError(404, "variant not found");
-    // console.log(variantObject)
-
- // Check uploaded files
+    console.log(variantObject)
+return
+    // Check uploaded files
     if (!req.files || !req.files.image) {
         throw new CustomError(400, "No image files provided");
     }
@@ -122,13 +122,34 @@ exports.updateVariantImage = asyncHandler(async (req, res) => {
     // Save uploaded URLs to variant document
     variantObject.image.push(...imageUrl);
     await variantObject.save()
-    apiResponse.sendSuccess(res , 200 , "variant image update successfully",variantObject);
+    apiResponse.sendSuccess(res, 200, "variant image update successfully", variantObject);
 });
 
-//@ delete variant image
-exports.deleteVariantImage = asyncHandler(async(req , res) => {
-    
+
+
+//@desc delete variant image
+exports.deleteVariantImage = asyncHandler(async (req, res) => {
+    const { slug } = req.params;
+    const { imageId } = req.body;
+    if (!slug || !imageId) throw new CustomError(400, "slug or imageId is missing");
+    const variantObject = await variantModel.findOne({ slug });
+    if (!variantObject)
+        throw new CustomError(404, "The variant you are looking for does not exist");
+
+    // Filter out the image to delete
+    const updatedImages = variantObject.image.filter((img) => img !== imageId);
+
+    //Remove from Cloudinary
+    const public_id = getPublicId(imageId);
+    await removeCloudinaryFile(public_id);
+
+    //Update the variant and save
+    variantObject.image = updatedImages;
+    await variantObject.save();
+
+    apiResponse.sendSuccess(res, 200, "Variant image deleted successfully", variantObject);
 });
+
 
 
 
