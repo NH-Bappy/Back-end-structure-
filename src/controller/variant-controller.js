@@ -28,7 +28,7 @@ exports.createNewVariant = asyncHandler(async (req, res) => {
         { new: true }
     )
     if (!pushVariant) throw new CustomError(404, "variant not updated into product");
-    apiResponse.sendSuccess(res, 200, "variant create successfully", variant);
+    apiResponse.sendSuccess(res, 201, "variant create successfully", variant);
 });
 
 //@desc find all variant
@@ -48,11 +48,6 @@ exports.findOneVariant = asyncHandler(async (req, res) => {
     if (!singleVariant) throw new CustomError(404, "variant not found");
     apiResponse.sendSuccess(res, 200, "variant found successfully", singleVariant);
 });
-
-
-
-
-
 
 
 //@desc update variant
@@ -97,14 +92,43 @@ exports.updateVariantInformation = asyncHandler(async (req, res) => {
         { new: true }
     );
 
-    if (!updatedVariant) throw new CustomError(500, "update unsuccessful");
+    if (!updatedVariant) throw new CustomError(304, "update unsuccessful");
 
-    apiResponse.sendSuccess(res ,200 ,"Variant info updated successfully" ,updatedVariant);
+    apiResponse.sendSuccess(res, 200, "Variant info updated successfully", updatedVariant);
 });
 
+//@ update image without information
+exports.updateVariantImage = asyncHandler(async (req, res) => {
+    const { slug } = req.params;
+    if (!slug) throw new CustomError(400, "slug is missing");
 
+    const variantObject = await variantModel.findOne({ slug });
+    if (!variantObject) throw new CustomError(404, "variant not found");
+    // console.log(variantObject)
 
+ // Check uploaded files
+    if (!req.files || !req.files.image) {
+        throw new CustomError(400, "No image files provided");
+    }
 
+    // console.log(req.files); this thing came from multer
+
+    // upload image into cloudinary 
+    const imageUrl = await Promise.all(
+        // req.files.image.map((singleImage) => console.log(singleImage.path))
+        req.files.image.map((singleImage) => uploadFileInCloudinary(singleImage.path))
+    );
+
+    // Save uploaded URLs to variant document
+    variantObject.image.push(...imageUrl);
+    await variantObject.save()
+    apiResponse.sendSuccess(res , 200 , "variant image update successfully",variantObject);
+});
+
+//@ delete variant image
+exports.deleteVariantImage = asyncHandler(async(req , res) => {
+    
+});
 
 
 

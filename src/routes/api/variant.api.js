@@ -7,6 +7,7 @@ _.route("/create-new-variant").post(upload.fields([{name: "image" ,maxCount: 10}
 _.route("/find-all").get(variantController.findAllVariant);
 _.route("/find-one/:slug").get(variantController.findOneVariant);
 _.route("/update-variant/:slug").put(upload.fields([{name: "image" ,maxCount: 10}]), variantController.updateVariantInformation);
+_.route("/variant-image-update/:slug").put(upload.fields([{name: "image" ,maxCount: 10}]) ,variantController.updateVariantImage);
 _.route("/delete-variant/:slug").delete(variantController.deleteVariant);
 
 

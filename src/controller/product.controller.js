@@ -110,6 +110,8 @@ exports.deleteProductImage = asyncHandler(async (req, res) => {
     apiResponse.sendSuccess(res, 200, "image delete successfully", productObject);
 });
 
+
+
 //@delete product
 exports.deleteProduct = asyncHandler(async (req, res) => {
     const { slug } = req.params;
