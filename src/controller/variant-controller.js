@@ -57,11 +57,51 @@ exports.findOneVariant = asyncHandler(async (req, res) => {
 
 //@desc update variant
 
-exports.updateVariantInformation = asyncHandler(async(req , res) => {
-    const {slug} = req.params;
-    if(!slug) throw new CustomError(401, "slug is missing");
+exports.updateVariantInformation = asyncHandler(async (req, res) => {
+    const { slug } = req.params;
+    if (!slug) throw new CustomError(400, "slug is missing");
+    const value = req.body;
+    // console.log(value);
 
+    /**| Loop Type  | Works On                   | Iterates Over             | Example                     |
+    | ---------- | -------------------------- | ------------------------- | --------------------------- |
+    | `for...in` | Objects                    | **Keys** (property names) | `{ name: "A", price: 200 }` |
+    | `for...of` | Arrays, Strings, Iterables ,sets ,maps  | **Values**                | `[10, 20, 30]`, `"abc"`     |
+     */
+    for (let postmanFields in value) {
+        if (value[postmanFields] == null || value[postmanFields] === "") {
+            throw new CustomError(400, `${postmanFields} is missing`);
+        }
+    }
+
+    const variantObject = await variantModel.findOne({ slug });
+    if (!variantObject) throw new CustomError(404, "variant is missing");
+
+    // Check if product reference has changed
+    //It checks whether the variant’s product field has been changed in the update request.
+    //value.product = This is the product ID sent in your request body (e.g. when updating a variant).
+    //variantObject.product = This is the product ID currently stored in the database for that variant.
+
+    const isProductChanged = value.product && value.product.toString() !== variantObject.product.toString();
+    if (isProductChanged) {
+        //Remove variant from old 
+        await productModel.findOneAndUpdate({ _id: variantObject.product }, { $pull: { variant: variantObject._id } });
+        // Add variant to new product
+        await productModel.findOneAndUpdate({ _id: value.product }, { $push: { variant: variantObject._id } });
+    };
+
+    // Update variant info
+    const updatedVariant = await variantModel.findOneAndUpdate(
+        { slug },
+        { ...value },
+        { new: true }
+    );
+
+    if (!updatedVariant) throw new CustomError(500, "update unsuccessful");
+
+    apiResponse.sendSuccess(res ,200 ,"Variant info updated successfully" ,updatedVariant);
 });
+
 
 
 
@@ -86,14 +126,14 @@ exports.deleteVariant = asyncHandler(async (req, res) => {
     // return
     if (!slug) throw new CustomError(400, "Slug is required");
 
-    const variantObject = await variantModel.findOne({slug});
+    const variantObject = await variantModel.findOne({ slug });
     // console.log(variantObject);
     // return
     if (!variantObject) throw new CustomError(404, "Variant not found");
 
     // delete images
     await Promise.all(
-        variantObject.image.map((singlePicture) => 
+        variantObject.image.map((singlePicture) =>
             removeCloudinaryFile(getPublicId(singlePicture))
         )
     );
