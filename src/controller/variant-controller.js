@@ -104,8 +104,8 @@ exports.updateVariantImage = asyncHandler(async (req, res) => {
 
     const variantObject = await variantModel.findOne({ slug });
     if (!variantObject) throw new CustomError(404, "variant not found");
-    console.log(variantObject)
-return
+    // console.log(variantObject)
+
     // Check uploaded files
     if (!req.files || !req.files.image) {
         throw new CustomError(400, "No image files provided");
@@ -149,20 +149,6 @@ exports.deleteVariantImage = asyncHandler(async (req, res) => {
 
     apiResponse.sendSuccess(res, 200, "Variant image deleted successfully", variantObject);
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 //@desc delete variant
 exports.deleteVariant = asyncHandler(async (req, res) => {
