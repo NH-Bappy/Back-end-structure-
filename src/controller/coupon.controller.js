@@ -11,41 +11,93 @@ exports.createCoupon = asyncHandler(async (req, res) => {
     // console.log(data);
     const couponObject = await couponModel.create({ ...data });
     if (!couponObject) throw new CustomError(400, "coupon not created please try again");
-    apiResponse.sendSuccess(res, 201, "coupon created successfully" ,couponObject);
+    apiResponse.sendSuccess(res, 201, "coupon created successfully", couponObject);
 });
 
 //@desc find all coupon
-exports.findAllCoupon = asyncHandler(async (req ,res) => {
+exports.findAllCoupon = asyncHandler(async (req, res) => {
     const findCoupon = await couponModel.find();
-    if(!findCoupon) throw new CustomError(404 , "coupon not found");
-    apiResponse.sendSuccess(res , 200 ,"find all coupon successfully" ,findCoupon);
+    if (!findCoupon) throw new CustomError(404, "coupon not found");
+    apiResponse.sendSuccess(res, 200, "find all coupon successfully", findCoupon);
 });
 
 //@desc find single coupon
-exports.singleCoupon = asyncHandler(async(req ,res) => {
-    const {slug} = req.params;
-    if(!slug) throw new CustomError(404 , "slug is missing");
-    const couponObject = await couponModel.findOne({slug});
-    if(!couponObject) throw new CustomError(404 , "The coupon you are looking for not found");
-    apiResponse.sendSuccess(res , 200 ,"coupon found successfully", couponObject);
+exports.singleCoupon = asyncHandler(async (req, res) => {
+    const { slug } = req.params;
+    if (!slug) throw new CustomError(404, "slug is missing");
+    const couponObject = await couponModel.findOne({ slug });
+    if (!couponObject) throw new CustomError(404, "The coupon you are looking for not found");
+    apiResponse.sendSuccess(res, 200, "coupon found successfully", couponObject);
 })
 
 //@desc update coupon
-exports.updateCoupon = asyncHandler(async(req , res) => {
-    const {slug} = req.params
+exports.updateCoupon = asyncHandler(async (req, res) => {
+    const { slug } = req.params
     const updateData = await validateCoupon(req);
-    if(!slug && updateData) throw new CustomError(404 ,"slug and update data is missing");
+    if (!slug && updateData) throw new CustomError(404, "slug and update data is missing");
     // console.log(updateData)
-    const couponUpdate = await couponModel.findOneAndUpdate({slug} , {...updateData} ,{new: true });
-    if(!couponUpdate) throw new CustomError(304 , "coupon not updated");
-    apiResponse.sendSuccess(res , 200 ,"coupon updated successfully" ,couponUpdate);
+    const couponUpdate = await couponModel.findOneAndUpdate({ slug }, { ...updateData }, { new: true });
+    if (!couponUpdate) throw new CustomError(304, "coupon not updated");
+    apiResponse.sendSuccess(res, 200, "coupon updated successfully", couponUpdate);
 });
 
 //@desc delete coupon
-exports.deleteCoupon = asyncHandler(async (req ,res) => {
-    const {slug} = req.params;
-    if(!slug) throw new CustomError(404 , "slug is missing");
-    const deleteCoupon = await couponModel.findOneAndDelete({slug});
-    if(!deleteCoupon) throw new CustomError(404 , "coupon not found");
-    apiResponse.sendSuccess(res , 200 , "coupon deleted successfully" ,deleteCoupon);
+exports.deleteCoupon = asyncHandler(async (req, res) => {
+    const { slug } = req.params;
+    if (!slug) throw new CustomError(404, "slug is missing");
+    const deleteCoupon = await couponModel.findOneAndDelete({ slug });
+    if (!deleteCoupon) throw new CustomError(404, "coupon not found");
+    apiResponse.sendSuccess(res, 200, "coupon deleted successfully", deleteCoupon);
 });
+
+
+//@desc is active or not status change
+exports.updateStatusCoupon = asyncHandler(async (req, res) => {
+    const { status, slug } = req.query;
+
+    if (!slug || !status) throw new CustomError(400, "slug or status not found");
+
+    let updateData = {};
+
+    if (status === "active") {
+        updateData.isActive = true;
+    } else {
+        updateData.isActive = false;
+    }
+
+    const couponStatus = await couponModel.findOneAndUpdate({ slug }, updateData, { new: true });
+    if (!couponStatus) throw new CustomError(404, "Coupon not found");
+    apiResponse.sendSuccess(res, 200, "Successfully updated coupon status", couponStatus);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

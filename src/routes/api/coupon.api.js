@@ -7,5 +7,6 @@ _.route("/find-all").get(couponController.findAllCoupon);
 _.route("/single-coupon/:slug").get(couponController.singleCoupon);
 _.route("/update-coupon/:slug").put(couponController.updateCoupon);
 _.route("/delete-coupon/:slug").delete(couponController.deleteCoupon);
+_.route("/coupon-status").put(couponController.updateStatusCoupon)
 
 module.exports = _;
