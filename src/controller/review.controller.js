@@ -58,14 +58,36 @@ exports.getSingleReview = asyncHandler(async (req, res) => {
 });
 
 //@update review
-exports.reviewUpdate = asyncHandler(async(req ,res) => {
-    const {id} = req.params;
+exports.reviewUpdate = asyncHandler(async (req, res) => {
+    const { id } = req.params;
     if (!id) throw new CustomError(404, "id is missing");
-    const updateReview = await reviewModel.findOneAndUpdate({_id: id} , {...req.body} ,{new:true});
-    if(!updateReview) throw new CustomError(304 , "review not modified")
-    apiResponse.sendSuccess(res , 200 ,"review modified successfully" ,updateReview)
+    const updateReview = await reviewModel.findOneAndUpdate({ _id: id }, { ...req.body }, { new: true });
+    if (!updateReview) throw new CustomError(304, "review not modified")
+    apiResponse.sendSuccess(res, 200, "review modified successfully", updateReview)
 });
 
+//@delete review
+exports.deleteReview = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    if (!id) throw new CustomError(404, "id is missing");
+    const deleteReview = await reviewModel.findOneAndDelete({ _id: id });
+    if (!deleteReview) throw new CustomError(404, "review not found or already deleted")
+    if (deleteReview.product) {
+        await productModel.findOneAndUpdate(
+            { _id: deleteReview.product },
+            { $pull: { reviews: deleteReview._id } },
+            { new: true }
+        );
+    }
+    if (deleteReview.variant) {
+        await variantModel.findOneAndUpdate(
+            { _id: deleteReview.variant },
+            { $pull: { reviews: deleteReview._id } },
+            { new: true }
+        );
+    }
+    apiResponse.sendSuccess(res, 200, "successfully deleted the review", deleteReview);
+});
 
 
 
