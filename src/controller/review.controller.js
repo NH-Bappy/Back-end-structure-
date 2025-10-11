@@ -40,8 +40,14 @@ exports.createReview = asyncHandler(async (req, res) => {
     apiResponse.sendSuccess(res, 201, "Review created successfully", reviewObject);
 });
 
+//@ get all review 
+exports.getAllReview = asyncHandler(async(req ,res) => {
+    const reviewObject = await reviewModel.find().sort({ createdAt: -1 });
+    if(!reviewObject) throw new CustomError(404 , "reviews not found");
+    apiResponse.sendSuccess(res , 200 ,"successfully founded all the review" ,reviewObject)
+})
 
-
+//@ find single review 
 
 
 
