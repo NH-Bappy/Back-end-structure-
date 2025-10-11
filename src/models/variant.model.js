@@ -10,6 +10,12 @@ const variantSchema = new mongoose.Schema({
         ref: "product",
         required: true,
     },
+    reviews: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Review"
+        }
+    ],
     name: {
         type: String,
         required: true,
