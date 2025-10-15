@@ -12,6 +12,8 @@ exports.createReview = asyncHandler(async (req, res) => {
     const reviewObject = await reviewModel.create(value);
     if (!reviewObject) throw new CustomError(500, "Failed to create review");
 
+    // console.log(reviewObject)
+    // return
     // Prepare update promises
     const promiseArray = [];
 
@@ -72,9 +74,11 @@ exports.deleteReview = asyncHandler(async (req, res) => {
     if (!id) throw new CustomError(404, "id is missing");
     const deleteReview = await reviewModel.findOneAndDelete({ _id: id });
     if (!deleteReview) throw new CustomError(404, "review not found or already deleted")
-    if (deleteReview.product) {
+        // console.log(deleteReview)
+        // return
+    if (deleteReview.reviewer) {
         await productModel.findOneAndUpdate(
-            { _id: deleteReview.product },
+            { _id: deleteReview.reviewer },
             { $pull: { reviews: deleteReview._id } },
             { new: true }
         );
