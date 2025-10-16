@@ -22,18 +22,18 @@ const cartSchemaValidation = Joi.object({
             "any.invalid": "User ID must be a valid ObjectId.",
         }),
 
-    guestId: Joi.string().optional().allow(null, "").messages({
+    guestID: Joi.string().optional().allow(null, "").messages({
         "string.base": "Guest ID must be a string.",
     }),
 
-    productId: Joi.string()
+    productID: Joi.string()
         .custom(isValidObjectId)
         .allow(null, "")
         .messages({
             "any.invalid": "Product ID must be a valid ObjectId.",
         }),
 
-    variantId: Joi.string()
+    variantID: Joi.string()
         .custom(isValidObjectId)
         .allow(null, "")
         .messages({
