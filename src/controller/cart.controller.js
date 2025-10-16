@@ -52,6 +52,7 @@ exports.addToCart = asyncHandler(async(req , res) => {
         unitTotalPrice: Math.floor(price * quantity),
         size,
         color,
+        coupon
     });
 
     // find cart
@@ -60,12 +61,14 @@ exports.addToCart = asyncHandler(async(req , res) => {
         cart = new cartModel({
             user: user,
             guestID: guestID,
-            items: [{ makeCartItem }],
+            items: [makeCartItem()],
         })
     }else{
-        console.log("product is already exit")
+        // This code runs only if the cart already exists
+        
     }
 
+    cart.items.push(makeCartItem())
     console.log(cart)
 });
 

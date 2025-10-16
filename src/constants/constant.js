@@ -1,1 +1,2 @@
-export const DbName = "node";
+const DbName = "node";
+module.exports = { DbName }

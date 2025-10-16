@@ -12,6 +12,7 @@ _.use("/product" ,require('../routes/api/product.api'));
 _.use("/variant" ,require('../routes/api/variant.api'));
 _.use("/coupon" ,require("../routes/api/coupon.api"));
 _.use("/review" ,require('../routes/api/review.api'));
+_.use("/cart" ,require('../routes/api/cart.api'));
 
 
 
