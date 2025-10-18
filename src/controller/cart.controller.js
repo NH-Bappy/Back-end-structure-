@@ -55,6 +55,10 @@ exports.addToCart = asyncHandler(async(req , res) => {
         coupon
     });
 
+
+
+
+
     // Find or create cart
     cart = await cartModel.findOne(query);
     if(!cart){
@@ -71,6 +75,9 @@ exports.addToCart = asyncHandler(async(req , res) => {
             ||
             (variantID && cartItem.variant == variantID)
     );
+
+
+
         if (findItemIndex >= 0){
             // Item already exists → increase quantity
             const qty = quantity || 1;
@@ -83,8 +90,16 @@ exports.addToCart = asyncHandler(async(req , res) => {
         }
     }
 
+
+
+
+
+
+
     // cart.items.push(makeCartItem())
-    console.log(cart.items);
+    await cart.save()
+    console.log(cart); 
+    apiResponse.sendSuccess(res , 200 , "create cart successfully" , cart)
 });
 
 
