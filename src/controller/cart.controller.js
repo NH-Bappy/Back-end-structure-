@@ -55,7 +55,7 @@ exports.addToCart = asyncHandler(async(req , res) => {
         coupon
     });
 
-    // find cart
+    // Find or create cart
     cart = await cartModel.findOne(query);
     if(!cart){
         cart = new cartModel({
@@ -65,11 +65,26 @@ exports.addToCart = asyncHandler(async(req , res) => {
         })
     }else{
         // This code runs only if the cart already exists
-        
+        const findItemIndex = cart.items.findIndex(
+            (cartItem) =>
+            (productID && cartItem.product == productID)
+            ||
+            (variantID && cartItem.variant == variantID)
+    );
+        if (findItemIndex >= 0){
+            // Item already exists → increase quantity
+            const qty = quantity || 1;
+            cart.items[findItemIndex].quantity += qty;
+            cart.items[findItemIndex].unitTotalPrice =
+                Math.floor(cart.items[findItemIndex].price * cart.items[findItemIndex].quantity);
+        }else{
+            // Item does not exist → add new
+            cart.items.push(makeCartItem());
+        }
     }
 
-    cart.items.push(makeCartItem())
-    console.log(cart)
+    // cart.items.push(makeCartItem())
+    console.log(cart.items);
 });
 
 
