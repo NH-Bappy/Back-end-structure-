@@ -54,9 +54,9 @@ const cartSchema = new mongoose.Schema({
         ref: "coupon",
         default: null,
     },
-    totalProduct: {
-        type: Number,
-    },
+    totalAmount: Number,
+    totalQuantity: Number,
+    totalProduct : Number,
     discountAmount: {
         type: Number,
         min: 0,

@@ -8,7 +8,7 @@ const variantModel = require('../models/variant.model');
 
 
 //add to cart
-exports.addToCart = asyncHandler(async(req , res) => {
+exports.addToCart = asyncHandler(async (req, res) => {
     const {
         user,
         guestID,
@@ -27,6 +27,10 @@ exports.addToCart = asyncHandler(async(req , res) => {
     let promiseArr = [];
     let price = 0;
 
+
+
+
+    // Get product or variant price
     if (productID) {
         // Find the full product document from the database using the provided productID
         product = await productModel.findById(productID);
@@ -34,7 +38,7 @@ exports.addToCart = asyncHandler(async(req , res) => {
         price = product.retailPrice;
     }
 
-    if (variantID){
+    if (variantID) {
         // Find the full product document from the database using the provided variantID
         variant = await variantModel.findById(variantID);
         // Store the variant's retail price in the variable 'price' for later calculations
@@ -61,45 +65,62 @@ exports.addToCart = asyncHandler(async(req , res) => {
 
     // Find or create cart
     cart = await cartModel.findOne(query);
-    if(!cart){
+    if (!cart) {
         cart = new cartModel({
             user: user,
             guestID: guestID,
             items: [makeCartItem()],
         })
-    }else{
+    } else {
         // This code runs only if the cart already exists
         const findItemIndex = cart.items.findIndex(
             (cartItem) =>
-            (productID && cartItem.product == productID)
-            ||
-            (variantID && cartItem.variant == variantID)
-    );
+                (productID && cartItem.product == productID)
+                ||
+                (variantID && cartItem.variant == variantID)
+        );
 
 
 
-        if (findItemIndex >= 0){
+        if (findItemIndex >= 0) {
             // Item already exists → increase quantity
             const qty = quantity || 1;
             cart.items[findItemIndex].quantity += qty;
             cart.items[findItemIndex].unitTotalPrice =
                 Math.floor(cart.items[findItemIndex].price * cart.items[findItemIndex].quantity);
-        }else{
+        } else {
             // Item does not exist → add new
             cart.items.push(makeCartItem());
         }
     }
 
 
+    // [Calculate totals]
+
+    // accumulator(acc) → stores running totals
+    // currentValue(item) → the element from the array that’s currently being processed.
+    // initialValue → the starting value of the accumulator
+
+    const totals = cart.items.reduce((accumulator, item) => {
+        accumulator.totalAmount += item.unitTotalPrice;
+        accumulator.totalQuantity += item.quantity;
+        return accumulator
+    },
+        { totalAmount: 0, totalQuantity: 0 }
+);
+    cart.totalAmountOfWholeProduct = totals.totalAmount;
+    // Saves total cost of all products 
+    cart.totalProduct = totals.totalQuantity;
+    // Saves total quantity of products
 
 
 
 
-
+    console.log(totals)
     // cart.items.push(makeCartItem())
-    await cart.save()
-    console.log(cart); 
-    apiResponse.sendSuccess(res , 200 , "create cart successfully" , cart)
+    // await cart.save()
+    // console.log(cart);
+    apiResponse.sendSuccess(res, 200, "create cart successfully", cart)
 });
 
 
