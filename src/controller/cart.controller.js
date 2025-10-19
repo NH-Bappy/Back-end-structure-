@@ -5,6 +5,38 @@ const { CustomError } = require('../utils/customError');
 const { cartValidation } = require('../validation/cart.validation');
 const productModel = require('../models/product.model');
 const variantModel = require('../models/variant.model');
+const couponModel = require('../models/coupon.model');
+const { boolean } = require('joi');
+
+
+
+// Helper: Calculate coupon discount
+const calculateCouponDiscount = async (coupon) => {
+    try {
+        const couponInstance = await couponModel.findOne({ code: coupon });
+        if (!couponInstance) throw new CustomError(404, "Coupon not found!");
+        console.log(couponInstance);
+        const { expireAt,
+            usageLimit,
+            usedCount,
+            isActive,
+            discountType,
+            discountValue
+        } = couponInstance
+        if (expireAt <= Date.now() && isActive == Boolean(false)){
+            throw new CustomError(404 , "coupon is expired!")
+        };
+
+
+
+
+    } catch (error) {
+        console.log("Error from apply coupon", error);
+    }
+};
+
+
+
 
 
 //add to cart
@@ -107,7 +139,7 @@ exports.addToCart = asyncHandler(async (req, res) => {
         return accumulator
     },
         { totalAmount: 0, totalQuantity: 0 }
-);
+    );
     cart.totalAmountOfWholeProduct = totals.totalAmount;
     // Saves total cost of all products 
     cart.totalProduct = totals.totalQuantity;
@@ -118,11 +150,29 @@ exports.addToCart = asyncHandler(async (req, res) => {
 
     console.log(totals)
     // cart.items.push(makeCartItem())
-    // await cart.save()
+    if (coupon) {
+        await calculateCouponDiscount(coupon)
+    }
+    await cart.save()
     // console.log(cart);
+
     apiResponse.sendSuccess(res, 200, "create cart successfully", cart)
 });
 
+
+// Apply Coupon
+// exports.applyCoupon = asyncHandler(async(req ,res)=> {
+//     const { coupon, guestID, user } = req.body;
+//     // console.log(user)
+
+//     const query = user ? {user} : guestID;
+
+//     const cartObject = await cartModel.findOne({ query });
+//     if (!cartObject) throw new CustomError(404, "cartObject not found!");
+
+//     const couponData = await calculateCouponDiscount(cartObject , coupon);
+//     console.log(couponData);
+// })
 
 
 

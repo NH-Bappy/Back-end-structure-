@@ -57,7 +57,6 @@ const cartSchemaValidation = Joi.object({
     }),
 
     coupon: Joi.string()
-        .custom(isValidObjectId)
         .allow(null, "")
         .messages({
             "any.invalid": "Coupon ID must be a valid ObjectId.",
