@@ -50,12 +50,12 @@ const cartSchemaValidation = Joi.object({
         "any.required": "Size is required.",
     }),
 
-    quantity: Joi.number().integer().min(1).required().messages({
+    quantity: Joi.number().integer().min(0).required().allow(null, "").messages({
         "number.base": "Quantity must be a number.",
         "number.min": "Quantity must be at least 1.",
         "any.required": "Quantity is required.",
     }),
-
+    decreaseQuantity: Joi.number().integer().min(0).optional().allow(null, ""),
     coupon: Joi.string()
         .allow(null, "")
         .messages({

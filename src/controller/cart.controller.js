@@ -71,17 +71,17 @@ exports.addToCart = asyncHandler(async (req, res) => {
         color,
         size,
         quantity,
-        coupon
+        coupon,
+        decreaseQuantity = 0 // new: how much to decrease
     } = await cartValidation(req);
-    const { query } = user ? { user } : { guestID }
-    //now make a addToCartObject
+
+    const query = user ? { user } : { guestID }
+
+    // now make a addToCartObject
     let cart = {};
     let product = {};
     let variant = {};
     let price = 0;
-
-
-
 
     // Get product or variant price
     if (productID) {
@@ -98,29 +98,29 @@ exports.addToCart = asyncHandler(async (req, res) => {
         price = variant.retailPrice;
     }
 
-
     // Helper to create a cart item
-
-    const makeCartItem = () => ({
-        product: productID || null,
-        variant: variantID || null,
-        quantity,
-        price,
-        unitTotalPrice: Math.floor(price * quantity),
-        size,
-        color,
-        coupon
-    });
-
+    const makeCartItem = () => {
+        const itemQuantity = quantity < 1 ? 1 : quantity; // minimum 1 for new item
+        return {
+            product: productID || null,
+            variant: variantID || null,
+            quantity: itemQuantity,
+            price,
+            unitTotalPrice: Math.floor(price * itemQuantity),
+            size,
+            color,
+            coupon
+        };
+    };
 
     // Find or create cart
     cart = await cartModel.findOne(query);
     if (!cart) {
         cart = new cartModel({
-            user: user,
-            guestID: guestID,
+            user: user || null,
+            guestID: guestID || null,
             items: [makeCartItem()],
-        })
+        });
     } else {
         // This code runs only if the cart already exists
         const findItemIndex = cart.items.findIndex(
@@ -130,12 +130,19 @@ exports.addToCart = asyncHandler(async (req, res) => {
                 (variantID && cartItem.variant == variantID)
         );
 
-
-
         if (findItemIndex >= 0) {
             // Item already exists → increase quantity
-            const qty = quantity || 1;
+            const qty = quantity || 0;
             cart.items[findItemIndex].quantity += qty;
+
+            // Decrease quantity if decreaseQuantity is provided
+            if (decreaseQuantity > 0) {
+                cart.items[findItemIndex].quantity -= decreaseQuantity;
+                if (cart.items[findItemIndex].quantity < 1)
+                    cart.items[findItemIndex].quantity = 1; // never below 1
+            }
+
+            // Update unit total price
             cart.items[findItemIndex].unitTotalPrice =
                 Math.floor(cart.items[findItemIndex].price * cart.items[findItemIndex].quantity);
         } else {
@@ -144,13 +151,10 @@ exports.addToCart = asyncHandler(async (req, res) => {
         }
     }
 
-
     // [Calculate totals]
-
     // accumulator(acc) → stores running totals
     // currentValue(item) → the element from the array that’s currently being processed.
     // initialValue → the starting value of the accumulator
-
     const totals = cart.items.reduce((accumulator, item) => {
         accumulator.totalAmount += item.unitTotalPrice;
         accumulator.totalQuantity += item.quantity;
@@ -163,19 +167,12 @@ exports.addToCart = asyncHandler(async (req, res) => {
     cart.totalProduct = totals.totalQuantity;
     // Saves total quantity of products
 
-
-
-
-    // console.log(totals.totalAmount)
-    // cart.items.push(makeCartItem())
-    // if (coupon) {
-    //     await calculateCouponDiscount(totals.totalAmount ,coupon)
-    // }
     await cart.save()
     // console.log(cart);
 
     apiResponse.sendSuccess(res, 200, "create cart successfully", cart)
 });
+
 
 
 // Apply Coupon
