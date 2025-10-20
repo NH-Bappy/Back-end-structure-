@@ -11,27 +11,49 @@ const { boolean } = require('joi');
 
 
 // Helper: Calculate coupon discount
-const calculateCouponDiscount = async (coupon) => {
+const calculateCouponDiscount = async ( totalBeforeDiscount ,coupon) => {
+    let totalAfterDiscount = 0;
+    let off = 0;
     try {
-        const couponInstance = await couponModel.findOne({ code: coupon });
-        if (!couponInstance) throw new CustomError(404, "Coupon not found!");
-        console.log(couponInstance);
+        const couponData = await couponModel.findOne({ code: coupon });
+        console.log(totalBeforeDiscount)
+        if (!couponData) throw new CustomError(404, "Coupon not found!");
+        // console.log(couponData);
         const { expireAt,
             usageLimit,
             usedCount,
             isActive,
             discountType,
             discountValue
-        } = couponInstance
+        } = couponData
+
         if (expireAt <= Date.now() && isActive == Boolean(false)){
             throw new CustomError(404 , "coupon is expired!")
         };
 
+        if (usageLimit < usedCount) throw new CustomError(403 , "the limit is expired");
 
-
-
+        if (discountType == "percentage"){
+            off = Math.ceil((totalBeforeDiscount * discountValue) / 100);
+            totalAfterDiscount = Math.ceil(totalBeforeDiscount - off);
+            // console.log(totalAfterDiscount)
+        }else{
+            totalAfterDiscount = Math.ceil(totalBeforeDiscount - discountValue);
+        }
+        // Track how many times this discount has been used (increase usedCount)
+        couponData.usedCount += 1;
+        await couponData.save();
+        return{
+            couponData,
+            off,
+            totalAfterDiscount,
+        }
     } catch (error) {
-        console.log("Error from apply coupon", error);
+        // Rollback usedCount if something failed
+        if (couponData){
+            await couponModel.findOneAndUpdate({ code: coupon }, {usedCount : usedCount -1});
+        }
+        throw new CustomError(404 , "error from calculate error" ,error);
     }
 };
 
@@ -92,9 +114,6 @@ exports.addToCart = asyncHandler(async (req, res) => {
     });
 
 
-
-
-
     // Find or create cart
     cart = await cartModel.findOne(query);
     if (!cart) {
@@ -148,11 +167,11 @@ exports.addToCart = asyncHandler(async (req, res) => {
 
 
 
-    console.log(totals)
+    console.log(totals.totalAmount)
     // cart.items.push(makeCartItem())
-    if (coupon) {
-        await calculateCouponDiscount(coupon)
-    }
+    // if (coupon) {
+    //     await calculateCouponDiscount(totals.totalAmount ,coupon)
+    // }
     await cart.save()
     // console.log(cart);
 
@@ -161,18 +180,34 @@ exports.addToCart = asyncHandler(async (req, res) => {
 
 
 // Apply Coupon
-// exports.applyCoupon = asyncHandler(async(req ,res)=> {
-//     const { coupon, guestID, user } = req.body;
-//     // console.log(user)
+exports.applyCoupon = asyncHandler(async(req ,res)=> {
+    const { coupon, guestID, user } = req.body;
+    // console.log(user)
 
-//     const query = user ? {user} : guestID;
+    const query = user ? { user } : { guestID };
 
-//     const cartObject = await cartModel.findOne({ query });
-//     if (!cartObject) throw new CustomError(404, "cartObject not found!");
+    const cartObject = await cartModel.findOne(query);
+    // console.log(cartObject)
+    if (!cartObject) throw new CustomError(404, "cartObject not found!");
 
-//     const couponData = await calculateCouponDiscount(cartObject , coupon);
-//     console.log(couponData);
-// })
+    const { couponData, off, totalAfterDiscount } = await calculateCouponDiscount(
+        cartObject.totalAmountOfWholeProduct, 
+        coupon);
+
+    // console.log(couponData);
+    // console.log(off);
+    // console.log(totalAfterDiscount);
+    cartObject.coupon = couponData._id;
+    // saves which coupon was applied to the cart.
+    cartObject.discountAmount = off;
+    // stores how much discount was given.
+    cartObject.discountType = couponData.discountType;
+    // records whether the discount was a percentage or fixed.
+    cartObject.totalAmountOfWholeProduct = totalAfterDiscount;
+    // updates the cart’s total price after applying the discount.
+    await cartObject.save();
+    apiResponse.sendSuccess(res, 200, "apply coupon successfully", cartObject);
+})
 
 
 
