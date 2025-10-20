@@ -16,7 +16,7 @@ const calculateCouponDiscount = async ( totalBeforeDiscount ,coupon) => {
     let off = 0;
     try {
         const couponData = await couponModel.findOne({ code: coupon });
-        console.log(totalBeforeDiscount)
+        // console.log(couponData)
         if (!couponData) throw new CustomError(404, "Coupon not found!");
         // console.log(couponData);
         const { expireAt,
@@ -78,7 +78,6 @@ exports.addToCart = asyncHandler(async (req, res) => {
     let cart = {};
     let product = {};
     let variant = {};
-    let promiseArr = [];
     let price = 0;
 
 
@@ -167,7 +166,7 @@ exports.addToCart = asyncHandler(async (req, res) => {
 
 
 
-    console.log(totals.totalAmount)
+    // console.log(totals.totalAmount)
     // cart.items.push(makeCartItem())
     // if (coupon) {
     //     await calculateCouponDiscount(totals.totalAmount ,coupon)
@@ -207,9 +206,31 @@ exports.applyCoupon = asyncHandler(async(req ,res)=> {
     // updates the cart’s total price after applying the discount.
     await cartObject.save();
     apiResponse.sendSuccess(res, 200, "apply coupon successfully", cartObject);
-})
+});
 
 
+// // clear cart completely
+// exports.clearCart = asyncHandler(async(req , res) => {
+//     const {user , guestID} = req.body;
+//     const query = user ? {user} : {guestID};
+//     const cartObject = await cartModel.findOne(query);
+//     if (!cartObject) throw new CustomError(404, "Cart not found!");
+//     cartObject.items = [];
+//     cartObject.totalAmountOfWholeProduct = 0;
+//     cartObject.totalProduct = 0;
+//     cartObject.coupon = null;
+//     cart.discountAmount = 0;
+//     await cart.save();
+//     apiResponse.sendSuccess(res, 200, "Cart cleared successfully", cart);
+// });
+
+exports.clearCart = asyncHandler(async (req, res) => {
+    const { user, guestID } = req.body;
+    const query = user ? { user } : { guestID };
+    const deletedCart = await cartModel.findOneAndDelete(query);
+    if (!deletedCart) throw new CustomError(404, "Cart not found!");
+    apiResponse.sendSuccess(res, 200, "Cart deleted successfully", deletedCart);
+});
 
 
 
