@@ -208,6 +208,20 @@ exports.applyCoupon = asyncHandler(async(req ,res)=> {
     apiResponse.sendSuccess(res, 200, "apply coupon successfully", cartObject);
 });
 
+//@desc getCart all cart items
+exports.getCart = asyncHandler(async (req, res) => {
+    const { user, guestID } = req.body;
+    const query = user ? { user } : { guestID };
+    const cart = await cartModel.findOne(query)
+        .populate("items.product")
+        .populate("items.variant")
+        .populate("coupon");
+    if (!cart) throw new CustomError(404, "Cart not found!");
+    apiResponse.sendSuccess(res, 200, "Cart fetched successfully", cart);
+});
+
+
+
 //@desc removeCartItem 
 exports.removeItem = asyncHandler(async (req , res) => {
     const {user , guestID , itemId} = req.body;
