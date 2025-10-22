@@ -205,54 +205,13 @@ exports.applyCoupon = asyncHandler(async(req ,res)=> {
     apiResponse.sendSuccess(res, 200, "apply coupon successfully", cartObject);
 });
 
-//@desc getCart all cart items
-exports.getCart = asyncHandler(async (req, res) => {
-    const { user, guestID } = req.body;
-    const query = user ? { user } : { guestID };
-    const cart = await cartModel.findOne(query)
-        .populate("items.product")
-        .populate("items.variant")
-        .populate("coupon");
-    if (!cart) throw new CustomError(404, "Cart not found!");
-    apiResponse.sendSuccess(res, 200, "Cart fetched successfully", cart);
-});
 
+//@desc increment product quantity
+// exports.itemIncrement = asyncHandler(async(req ,res) => {
 
-
-//@desc removeCartItem 
-exports.removeItem = asyncHandler(async (req , res) => {
-    const {user , guestID , itemId} = req.body;
-    const query = user ? {user} : {guestID};
-    const deleteCartItem = await cartModel.findOne(query);
-    if (!deleteCartItem) throw new CustomError(404, "Cart not found!");
-    deleteCartItem.items = deleteCartItem.items.filter(item => item._id.toString() !== itemId);
-    await deleteCartItem.save();
-    apiResponse.sendSuccess(res, 200, "successfully deleted cart item", deleteCartItem)
-});
-
-
-// // clear cart completely
-// exports.clearCart = asyncHandler(async(req , res) => {
-//     const {user , guestID} = req.body;
-//     const query = user ? {user} : {guestID};
-//     const cartObject = await cartModel.findOne(query);
-//     if (!cartObject) throw new CustomError(404, "Cart not found!");
-//     cartObject.items = [];
-//     cartObject.totalAmountOfWholeProduct = 0;
-//     cartObject.totalProduct = 0;
-//     cartObject.coupon = null;
-//     cart.discountAmount = 0;
-//     await cart.save();
-//     apiResponse.sendSuccess(res, 200, "Cart cleared successfully", cart);
 // });
 
-exports.clearCart = asyncHandler(async (req, res) => {
-    const { user, guestID } = req.body;
-    const query = user ? { user } : { guestID };
-    const deletedCart = await cartModel.findOneAndDelete(query);
-    if (!deletedCart) throw new CustomError(404, "Cart not found!");
-    apiResponse.sendSuccess(res, 200, "Cart deleted successfully", deletedCart);
-});
+
 
 
 
