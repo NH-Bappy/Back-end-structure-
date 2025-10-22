@@ -207,10 +207,14 @@ exports.applyCoupon = asyncHandler(async(req ,res)=> {
 
 
 //@desc increment product quantity
-// exports.itemIncrement = asyncHandler(async(req ,res) => {
-
-// });
-
+exports.itemIncrement = asyncHandler(async (req, res) => {
+    const { itemID } = req.body;
+    await cartModel.updateOne(
+        { "items._id": itemID },
+        { $inc: { "items.$.quantity": 1 } }
+    );
+    console.log(cartObject)
+});
 
 
 
