@@ -266,7 +266,32 @@ exports.decrementQuantity = asyncHandler(async (req, res) => {
     apiResponse.sendSuccess(res, 200, "create cart successfully", cartData)
 });
 
+//@desc delete item
+exports.deleteItem = asyncHandler(async (req, res) => {
+    const { itemID } = req.body;
+    const cartData = await cartModel.findOne({ "items._id": itemID });
+    // console.log(cartData)
+    const specificItemRemove = cartData.items.filter((item) => item._id != itemID);
+    // console.log(specificItemRemove)
+    cartData.items = specificItemRemove
 
+    // overAll count price
+    const totals = cartData.items.reduce((acc, item) => {
+        acc.totalAmount += item.unitTotalPrice
+        acc.totalQuantity += item.quantity
+        return acc
+    },
+
+        { totalAmount: 0, totalQuantity: 0 }
+    )
+    cartData.totalAmountOfWholeProduct = totals.totalAmount;
+    cartData.totalProduct = totals.totalQuantity;
+    await cartData.save()
+    if (cartData.items.length == 0) {
+        await cartModel.deleteOne({ _id: cartData._id });
+    }
+    apiResponse.sendSuccess(res, 200, "create cart successfully", cartData)
+});
 
 
 
