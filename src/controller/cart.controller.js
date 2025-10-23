@@ -11,7 +11,7 @@ const { boolean } = require('joi');
 
 
 // Helper: Calculate coupon discount
-const calculateCouponDiscount = async ( totalBeforeDiscount ,coupon) => {
+const calculateCouponDiscount = async (totalBeforeDiscount, coupon) => {
     let totalAfterDiscount = 0;
     let off = 0;
     try {
@@ -27,33 +27,33 @@ const calculateCouponDiscount = async ( totalBeforeDiscount ,coupon) => {
             discountValue
         } = couponData
 
-        if (expireAt <= Date.now() && isActive == Boolean(false)){
-            throw new CustomError(404 , "coupon is expired!")
+        if (expireAt <= Date.now() && isActive == Boolean(false)) {
+            throw new CustomError(404, "coupon is expired!")
         };
 
-        if (usageLimit < usedCount) throw new CustomError(403 , "the limit is expired");
+        if (usageLimit < usedCount) throw new CustomError(403, "the limit is expired");
 
-        if (discountType == "percentage"){
+        if (discountType == "percentage") {
             off = Math.ceil((totalBeforeDiscount * discountValue) / 100);
             totalAfterDiscount = Math.ceil(totalBeforeDiscount - off);
             // console.log(totalAfterDiscount)
-        }else{
+        } else {
             totalAfterDiscount = Math.ceil(totalBeforeDiscount - discountValue);
         }
         // Track how many times this discount has been used (increase usedCount)
         couponData.usedCount += 1;
         await couponData.save();
-        return{
+        return {
             couponData,
             off,
             totalAfterDiscount,
         }
     } catch (error) {
         // Rollback usedCount if something failed
-        if (couponData){
-            await couponModel.findOneAndUpdate({ code: coupon }, {usedCount : usedCount -1});
+        if (couponData) {
+            await couponModel.findOneAndUpdate({ code: coupon }, { usedCount: usedCount - 1 });
         }
-        throw new CustomError(404 , "error from calculate error" ,error);
+        throw new CustomError(404, "error from calculate error", error);
     }
 };
 
@@ -176,7 +176,7 @@ exports.addToCart = asyncHandler(async (req, res) => {
 
 
 // Apply Coupon
-exports.applyCoupon = asyncHandler(async(req ,res)=> {
+exports.applyCoupon = asyncHandler(async (req, res) => {
     const { coupon, guestID, user } = req.body;
     // console.log(user)
 
@@ -187,7 +187,7 @@ exports.applyCoupon = asyncHandler(async(req ,res)=> {
     if (!cartObject) throw new CustomError(404, "cartObject not found!");
 
     const { couponData, off, totalAfterDiscount } = await calculateCouponDiscount(
-        cartObject.totalAmountOfWholeProduct, 
+        cartObject.totalAmountOfWholeProduct,
         coupon);
 
     // console.log(couponData);
@@ -216,15 +216,15 @@ exports.itemIncrement = asyncHandler(async (req, res) => {
     // console.log(singleItem)
     const targetItem = cartObject.items[singleItem];
     targetItem.quantity += 1;
-    targetItem.unitTotalPrice = targetItem.quantity * targetItem.price;
+    targetItem.unitTotalPrice = Math.ceil(targetItem.quantity * targetItem.price);
     // Calculate totals Amount
     const total = cartObject.items.reduce((accumulator, item) => {
         accumulator.totalAmount += item.unitTotalPrice;
-        accumulator.totalQuantity += item.quantity; 
+        accumulator.totalQuantity += item.quantity;
         return accumulator
     },
         { totalAmount: 0, totalQuantity: 0 }
-);
+    );
     cartObject.totalAmountOfWholeProduct = total.totalAmount;
     // Saves total cost of all products 
     cartObject.totalProduct = total.totalQuantity;
@@ -236,6 +236,35 @@ exports.itemIncrement = asyncHandler(async (req, res) => {
 });
 
 
+//@desc decrement product quantity
+exports.decrementQuantity = asyncHandler(async (req, res) => {
+    const { itemID } = req.body;
+    const cartData = await cartModel.findOne({ "items._id": itemID });
+    // console.log(cartData)
+    const specificItem = cartData.items.findIndex((item) => item._id == itemID);
+    // console.log(cartData.items[specificItem]);
+    const targetItem = cartData.items[specificItem];
+    if (targetItem.quantity > 1) {
+        targetItem.quantity -= 1
+        targetItem.unitTotalPrice = Math.ceil(targetItem.quantity * targetItem.price);
+    } else {
+        targetItem.quantity = targetItem.quantity;
+        targetItem.unitTotalPrice = Math.ceil(targetItem.quantity * targetItem.price);
+    }
+    // overAll count price
+    const totals = cartData.items.reduce((acc, item) => {
+        acc.totalAmount += item.unitTotalPrice
+        acc.totalQuantity += item.quantity
+        return acc
+    },
+
+        { totalAmount: 0, totalQuantity: 0 }
+    )
+    cartData.totalAmountOfWholeProduct = totals.totalAmount;
+    cartData.totalProduct = totals.totalQuantity;
+    await cartData.save()
+    apiResponse.sendSuccess(res, 200, "create cart successfully", cartData)
+});
 
 
 
