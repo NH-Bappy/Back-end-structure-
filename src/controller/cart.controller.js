@@ -209,11 +209,30 @@ exports.applyCoupon = asyncHandler(async(req ,res)=> {
 //@desc increment product quantity
 exports.itemIncrement = asyncHandler(async (req, res) => {
     const { itemID } = req.body;
-    await cartModel.updateOne(
-        { "items._id": itemID },
-        { $inc: { "items.$.quantity": 1 } }
-    );
-    console.log(cartObject)
+    const cartObject = await cartModel.findOne({ "items._id": itemID });
+    // console.log(cartObject)
+    const singleItem = cartObject.items.findIndex((item) => item._id == itemID);
+    // console.log(cartObject.items[singleItem]);
+    // console.log(singleItem)
+    const targetItem = cartObject.items[singleItem];
+    targetItem.quantity += 1;
+    targetItem.unitTotalPrice = targetItem.quantity * targetItem.price;
+    // Calculate totals Amount
+    const total = cartObject.items.reduce((accumulator, item) => {
+        accumulator.totalAmount += item.unitTotalPrice;
+        accumulator.totalQuantity += item.quantity; 
+        return accumulator
+    },
+        { totalAmount: 0, totalQuantity: 0 }
+);
+    cartObject.totalAmountOfWholeProduct = total.totalAmount;
+    // Saves total cost of all products 
+    cartObject.totalProduct = total.totalQuantity;
+    // Saves total quantity of products
+    await cartObject.save()
+    // console.log(cart);
+    apiResponse.sendSuccess(res, 200, "create cart successfully", cartObject)
+
 });
 
 
