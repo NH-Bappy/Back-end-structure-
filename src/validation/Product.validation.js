@@ -24,7 +24,9 @@ const productValidationSchema = Joi.object({
     }),
     subCategory: Joi.custom(isValidObjectId).allow(null, ""),
     Brand: Joi.custom(isValidObjectId).allow(null, ""),
+    
     variant: Joi.custom(isValidObjectId).allow(null, ""),
+
     discount: Joi.custom(isValidObjectId).allow(null, ""),
     manufactureCountry: Joi.string().allow("", null),
     rating: Joi.number().min(0).max(5).allow(null),

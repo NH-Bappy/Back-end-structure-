@@ -1,8 +1,12 @@
 const express = require('express');
 const cookieParser = require('cookie-parser')
-const app = express();
 const cors = require('cors');
 const { globalErrorHandler } = require('./src/utils/globalErrorHandler');
+const { createServer } = require("http");
+const app = express();
+//socket io
+
+
 
 // use of middleware
 
@@ -24,10 +28,10 @@ app.use('/api/v1' , require('./src/routes/index.api'))
 app.use(globalErrorHandler)
 
 
+// server for Socket io
+const httpServer = createServer(app);
 
 
 
 
-
-
-module.exports = {app};
+module.exports = { httpServer };
