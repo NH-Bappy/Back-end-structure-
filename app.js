@@ -3,6 +3,7 @@ const cookieParser = require('cookie-parser')
 const cors = require('cors');
 const { globalErrorHandler } = require('./src/utils/globalErrorHandler');
 const { createServer } = require("http");
+const { Server } = require("socket.io");
 const app = express();
 //socket io
 
@@ -30,8 +31,14 @@ app.use(globalErrorHandler)
 
 // server for Socket io
 const httpServer = createServer(app);
-
-
-
+const io = new Server(httpServer, {
+    cors: "*"
+});
+io.on("connection" , (socket) => {
+    console.log(socket);
+});
+io.on("disconnect" , () => {
+    console.log("user disconnect");
+});
 
 module.exports = { httpServer };
