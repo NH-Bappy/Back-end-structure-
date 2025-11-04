@@ -6,63 +6,15 @@ const { cartValidation } = require('../validation/cart.validation');
 const productModel = require('../models/product.model');
 const variantModel = require('../models/variant.model');
 const couponModel = require('../models/coupon.model');
-const { boolean } = require('joi');
-
-
-
-// Helper: Calculate coupon discount
-const calculateCouponDiscount = async (totalBeforeDiscount, coupon) => {
-    let totalAfterDiscount = 0;
-    let off = 0;
-    try {
-        const couponData = await couponModel.findOne({ code: coupon });
-        // console.log(couponData)
-        if (!couponData) throw new CustomError(404, "Coupon not found!");
-        // console.log(couponData);
-        const { expireAt,
-            usageLimit,
-            usedCount,
-            isActive,
-            discountType,
-            discountValue
-        } = couponData
-
-        if (expireAt <= Date.now() && isActive == Boolean(false)) {
-            throw new CustomError(404, "coupon is expired!")
-        };
-
-        if (usageLimit < usedCount) throw new CustomError(403, "the limit is expired");
-
-        if (discountType == "percentage") {
-            off = Math.ceil((totalBeforeDiscount * discountValue) / 100);
-            totalAfterDiscount = Math.ceil(totalBeforeDiscount - off);
-            // console.log(totalAfterDiscount)
-        } else {
-            totalAfterDiscount = Math.ceil(totalBeforeDiscount - discountValue);
-        }
-        // Track how many times this discount has been used (increase usedCount)
-        couponData.usedCount += 1;
-        await couponData.save();
-        return {
-            couponData,
-            off,
-            totalAfterDiscount,
-        }
-    } catch (error) {
-        // Rollback usedCount if something failed
-        if (couponData) {
-            await couponModel.findOneAndUpdate({ code: coupon }, { usedCount: usedCount - 1 });
-        }
-        throw new CustomError(404, "error from calculate error", error);
-    }
-};
-
-
-
+const { getIo } = require('../socket_io/server');
 
 
 //add to cart
 exports.addToCart = asyncHandler(async (req, res) => {
+    getIo().to("1234").emit("addToCart", {
+        message: "add to cart successfully",
+        data: null
+    })
     const {
         user,
         guestID,
@@ -170,8 +122,63 @@ exports.addToCart = asyncHandler(async (req, res) => {
     await cart.save()
     // console.log(cart);
 
+    // emit event fire
+    getIo().to("1234").emit("addToCart", {
+        message: "add to cart successfully",
+        data: null
+    })
+
     apiResponse.sendSuccess(res, 200, "create cart successfully", cart)
 });
+
+
+
+// Helper: Calculate coupon discount
+const calculateCouponDiscount = async (totalBeforeDiscount, coupon) => {
+    let totalAfterDiscount = 0;
+    let off = 0;
+    try {
+        const couponData = await couponModel.findOne({ code: coupon });
+        // console.log(couponData)
+        if (!couponData) throw new CustomError(404, "Coupon not found!");
+        // console.log(couponData);
+        const { expireAt,
+            usageLimit,
+            usedCount,
+            isActive,
+            discountType,
+            discountValue
+        } = couponData
+
+        if (expireAt <= Date.now() && isActive == Boolean(false)) {
+            throw new CustomError(404, "coupon is expired!")
+        };
+
+        if (usageLimit < usedCount) throw new CustomError(403, "the limit is expired");
+
+        if (discountType == "percentage") {
+            off = Math.ceil((totalBeforeDiscount * discountValue) / 100);
+            totalAfterDiscount = Math.ceil(totalBeforeDiscount - off);
+            // console.log(totalAfterDiscount)
+        } else {
+            totalAfterDiscount = Math.ceil(totalBeforeDiscount - discountValue);
+        }
+        // Track how many times this discount has been used (increase usedCount)
+        couponData.usedCount += 1;
+        await couponData.save();
+        return {
+            couponData,
+            off,
+            totalAfterDiscount,
+        }
+    } catch (error) {
+        // Rollback usedCount if something failed
+        if (couponData) {
+            await couponModel.findOneAndUpdate({ code: coupon }, { usedCount: usedCount - 1 });
+        }
+        throw new CustomError(404, "error from calculate error", error);
+    }
+};
 
 
 

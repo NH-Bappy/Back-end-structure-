@@ -12,11 +12,14 @@ socket.on("connect", () => {
 });
 
 
+// grave the data to server
+socket.on('addToCart' , (data) => {
+    console.log("data is " , data)
+})
 
+// clint sending data to server
 
-
-
-
+socket.emit("test" , "hello")
 
 
 socket.on("disconnect", () => {

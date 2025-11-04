@@ -27,15 +27,19 @@ module.exports = {
                 // Example: if client connects with io("server_url", { query: { userId: "123" } })
                 // then userId will be "123"
                 const userId = socket.handshake.query.userId;
-                console.log(userId)
+
+                // console.log(userId)
 
                 // Join a private room named after the user's ID
                 // This allows the server to send messages specifically to this user later
                 // Example: io.to(userId).emit("notification", { message: "Hello!" });
                 socket.join(userId);
 
+                //data coming from clint side
+                socket.on("test", (data) => {
+                    console.log("Data coming from client side:", data);
+                });
 
-//////////////////
 
                 /**
                  * Listen for the client disconnecting.
@@ -54,7 +58,6 @@ module.exports = {
                  * });
                  */
             });
-
         } catch (error) {
             // If something goes wrong during initialization, log the error
             console.error("⚠️ Socket initialization error:", error);
