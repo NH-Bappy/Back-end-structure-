@@ -20,3 +20,12 @@ exports.findAllDeliveryCharges = asyncHandler(async(req ,res) => {
     apiResponse.sendSuccess(res, 200, "successfully found all the delivery charge", findAll);
 })
 
+// find single product
+
+exports.findSingleDeliveryCharges = asyncHandler(async (req, res) => {
+    const { slug } = req.params;
+    if (!slug) {throw new CustomError(401, "Slug Not Found")}
+    const findOne = await deliveryChargeModel.findOne({slug});
+    if (!findOne) throw new CustomError(402, "delivery charge not found");
+    apiResponse.sendSuccess(res, 200, "successfully found the delivery charge", findOne);
+})

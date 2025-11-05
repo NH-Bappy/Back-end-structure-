@@ -4,5 +4,6 @@ const deliveryController = require('../../controller/delivery.controller')
 
 _.route("/create-deliveryCharge").post(deliveryController.createDeliveryCharge)
 _.route("/findAll-deliveryCharges").get(deliveryController.findAllDeliveryCharges)
+_.route("/find-single-deliveryCharges/:slug").get(deliveryController.findSingleDeliveryCharges);
 
 module.exports = _;
