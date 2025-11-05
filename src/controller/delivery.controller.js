@@ -31,10 +31,21 @@ exports.findSingleDeliveryCharges = asyncHandler(async (req, res) => {
 });
 
 // update deliveryCharges
-exports.updateDeliveryCharges = asyncHandler(async(req ,res) => {
-    const {slug} = req.params;
-    if (!slug) { throw new CustomError(401, "Slug Not Found") }
+exports.updateDeliveryCharges = asyncHandler(async (req, res) => {
+    const { slug } = req.params;
+    const data = req.body;
+    if (!slug || !data) {
+        throw new CustomError(400, "Slug or data missing");
+    }
+    const updateData = await deliveryChargeModel.findOneAndUpdate(
+        { slug },
+        { ...data },
+        { new: true }
+    );
+    if (!updateData) {throw new CustomError(404, "Delivery charge not found");}
+    apiResponse.sendSuccess(res, 200, "Successfully updated the delivery charge", updateData);
 });
+
 
 
 

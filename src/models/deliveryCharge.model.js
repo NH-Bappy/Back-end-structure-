@@ -47,4 +47,24 @@ deliveryChargeSchema.pre('save', async function (next) {
     next();
 });
 
+
+deliveryChargeSchema.pre('findOneAndUpdate', function (next) {   // Middleware runs before "findOneAndUpdate"
+    const update = this.getUpdate();                       // Get the update object (fields being updated)
+
+    if (update.name) {                                     // If "name" is being updated
+        update.slug = slugify(update.name, {               // Generate new slug from the updated "name"
+            replacement: "-",                              // Replace spaces with dashes
+            lower: true,                                   // Convert slug to lowercase
+            strict: false,                                 // Allow special characters (set to true to remove)
+            trim: true,                                    // Trim spaces from start/end
+        });
+
+        this.setUpdate(update);                            // Apply the updated object back to the query
+    }
+
+    next();  // Continue with the update operation
+});
+
+
+
 module.exports = mongoose.models.DeliveryCharge || mongoose.model('DeliveryCharge', deliveryChargeSchema);
