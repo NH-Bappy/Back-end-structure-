@@ -28,4 +28,21 @@ exports.findSingleDeliveryCharges = asyncHandler(async (req, res) => {
     const findOne = await deliveryChargeModel.findOne({slug});
     if (!findOne) throw new CustomError(402, "delivery charge not found");
     apiResponse.sendSuccess(res, 200, "successfully found the delivery charge", findOne);
-})
+});
+
+// update deliveryCharges
+exports.updateDeliveryCharges = asyncHandler(async(req ,res) => {
+    const {slug} = req.params;
+    if (!slug) { throw new CustomError(401, "Slug Not Found") }
+});
+
+
+
+// delete deliveryCharge
+exports.DeleteDeliveryCharge = asyncHandler(async (req ,res) => {
+    const {slug} = req.params;
+    if (!slug) throw new CustomError(401, "Slug Not Found")
+    const removeDeliveryCharge = await deliveryChargeModel.findOneAndDelete({slug})
+    if (!removeDeliveryCharge) throw new CustomError(402 , "not found the delivery Charges your looking for");
+    apiResponse.sendSuccess(res , 200 ,"successfully remove the deliveryCharges" ,removeDeliveryCharge)
+});
