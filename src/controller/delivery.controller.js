@@ -13,5 +13,10 @@ exports.createDeliveryCharge = asyncHandler(async(req , res) => {
     apiResponse.sendSuccess(res, 200, "successfully created the delivery charge", createDeliveryCharge);
 });
 
-
+// get all the delivery
+exports.findAllDeliveryCharges = asyncHandler(async(req ,res) => {
+    const findAll = await deliveryChargeModel.find();
+    if (!findAll) throw new CustomError(402, "delivery charge not found");
+    apiResponse.sendSuccess(res, 200, "successfully found all the delivery charge", findAll);
+})
 
