@@ -60,11 +60,16 @@ const productSchema = new Schema({
     alertQuantity: Number,
     stockAlert: Boolean,
     inStock: Boolean,
+    minimumOrderQuantity: Number,
+    totalSale: {
+        type: Number,
+        min: 0,
+    },
     isActive: {
         type: Boolean,
         default: true,
     },
-    minimumOrderQuantity: Number,
+    
 }, { timestamps: true });
 
 // Create slug before save
