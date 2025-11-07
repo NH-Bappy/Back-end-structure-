@@ -1,6 +1,7 @@
 const Joi = require("joi");
 const mongoose = require("mongoose");
-const { customError } = require("../../utils/customError");
+const { CustomError } = require("../utils/customError");
+
 
 // Helper: Validate MongoDB ObjectId
 const isValidObjectId = (value, helpers) => {
@@ -83,7 +84,7 @@ exports.validateOrder = async (req) => {
         return value;
     } catch (error) {
         console.log("Error from validateOrder method:", error);
-        throw new customError(
+        throw new CustomError(
             400,
             error.details ? error.details[0].message : error.message
         );
