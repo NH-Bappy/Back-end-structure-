@@ -12,21 +12,39 @@ exports.createOrder = asyncHandler(async (req, res) => {
     const { user, guestID, shippingInfo, deliveryCharge } = await validateOrder(req);
     // console.log(value)
     const Id = user ? { user } : { guestID }
-    console.log(Id)
+    // console.log(Id)
     const cart = await cartModel.findOne(Id);
     if (!cart) throw new CustomError(404, "Cart not found");
     // console.log(cart);
 
     // return
+
+
     // stock reduce
-
-
-    Promise.all(
-        cart.items.map((item) => {
+    const productQuantity = await Promise.all(
+        cart.items.map(async (item) => {
             if (item.product) {
-                productModel.findOneAndDelete({ _id: item.product }, { $inc: { item: -item.quantity } }
-                )
+                return await productModel
+                    .findOneAndUpdate(
+                        { _id: item.product },
+                        { $inc: { stock: -item.quantity, totalSale: item.quantity } },
+                        { new: true }
+                    )
+                    .select("-QrCode -barCode -updatedAt -tag -reviews");
+            } else {
+                return await variantModel
+                    .findOneAndUpdate(
+                        { _id: item.variant},
+                        { $inc: { stockVariant: -item.quantity, totalSale: item.quantity } },
+                        { new: true }
+                    )
+                    .select("-QrCode -barCode -updatedAt -tag -reviews");
             }
         })
     );
+
+    // console.log(productQuantity);
+    // create order object
+    
+
 });

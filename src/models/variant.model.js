@@ -56,6 +56,10 @@ const variantSchema = new mongoose.Schema({
         required: true,
         min: 0,
     },
+    totalSale: {
+        type: Number,
+        min: 0,
+    },
     image: [
         {
             type: String,
