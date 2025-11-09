@@ -18,7 +18,14 @@ const variantModel = require('../models/variant.model');
 
 
 // Helper: Calculate Delivery Charge
-
+const deliveryChargeCalculate = async (deliveryCharge) => {
+    try {
+    return await deliveryChargeModel.findById(deliveryCharge);
+        // console.log(charge);
+    } catch (error) {
+        throw new CustomError(501 , "error from delivery charge calculate")
+    }
+}
 
 
 exports.createOrder = asyncHandler(async (req, res) => {
@@ -69,10 +76,13 @@ exports.createOrder = asyncHandler(async (req, res) => {
         discountAmount: cart.discountAmount,
     })
 
-    console.log(order)
+    // console.log(order)
 
-
-
+    // apply delivery Fee and set finalAmount
+    const DeliveryFee = await deliveryChargeCalculate(deliveryCharge);
+    // console.log(DeliveryFee)
+    order.finalAmount = Math.floor(cart.totalAmountOfWholeProduct + DeliveryFee.amount) - cart.discountAmount;
+    order.deliveryZone = DeliveryFee.name;
 
 
 
