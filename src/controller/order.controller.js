@@ -8,6 +8,19 @@ const orderModel = require('../models/order.mode');
 const productModel = require('../models/product.model');
 const variantModel = require('../models/variant.model');
 
+
+
+
+
+
+
+
+
+
+// Helper: Calculate Delivery Charge
+
+
+
 exports.createOrder = asyncHandler(async (req, res) => {
     const { user, guestID, shippingInfo, deliveryCharge } = await validateOrder(req);
     // console.log(value)
@@ -20,7 +33,7 @@ exports.createOrder = asyncHandler(async (req, res) => {
     // return
 
 
-    // stock reduce
+    // stock || quantity reduce
     const productQuantity = await Promise.all(
         cart.items.map(async (item) => {
             if (item.product) {
@@ -44,7 +57,55 @@ exports.createOrder = asyncHandler(async (req, res) => {
     );
 
     // console.log(productQuantity);
+
     // create order object
-    
+    const order = new orderModel({
+        user,
+        guestID,
+        items: productQuantity,
+        shippingInfo,
+        deliveryCharge,
+        coupon: cart.coupon,
+        discountAmount: cart.discountAmount,
+    })
+
+    console.log(order)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 });
