@@ -5,7 +5,7 @@ const { apiResponse } = require('../utils/apiResponse');
 const { validateOrder } = require('../validation/order.validation');
 const deliveryChargeModel = require('../models/deliveryCharge.model');
 const cartModel = require("../models/cart.model");
-const orderModel = require('../models/order.mode');
+const orderModel = require('../models/order.model');
 const productModel = require('../models/product.model');
 const variantModel = require('../models/variant.model');
 const { fetchTransactionId } = require('../helpers/uniqueId');
@@ -13,8 +13,8 @@ const { fetchTransactionId } = require('../helpers/uniqueId');
 // SSLCommerz  from github
 
 const SSLCommerzPayment = require('sslcommerz-lts')
-const store_id = '<your_store_id>'
-const store_passwd = '<your_store_password>'
+const store_id = process.env.STORE_ID;
+const store_passwd = process.env.STORE_PASSWORD;
 const is_live = process.env.NODE_ENV == "development" ? false : true ;  //true for live, false for sandbox
 
 
@@ -101,10 +101,10 @@ exports.createOrder = asyncHandler(async (req, res) => {
             total_amount: 100,
             currency: 'BDT',
             tran_id: 'REF123', // use unique tran_id for each api call
-            success_url: 'http://localhost:3030/success',
-            fail_url: 'http://localhost:3030/fail',
-            cancel_url: 'http://localhost:3030/cancel',
-            ipn_url: 'http://localhost:3030/ipn',
+            success_url: 'http://localhost:4000/api/v1/payment/success',
+            fail_url: 'http://localhost:4000/api/v1/payment/fail',
+            cancel_url: 'http://localhost:4000/api/v1/payment/cancel',
+            ipn_url: 'http://localhost:4000/api/v1/payment/ipn',
             shipping_method: 'Courier',
             product_name: 'Computer.',
             product_category: 'Electronic',
@@ -127,6 +127,9 @@ exports.createOrder = asyncHandler(async (req, res) => {
             ship_postcode: 1000,
             ship_country: 'Bangladesh',
         };
+        const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live)
+        const response = await sslcz.init(data);
+        console.log(response.GatewayPageURL);
     }
 
     // Generate Transaction & Invoice
