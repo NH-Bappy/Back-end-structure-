@@ -9,3 +9,25 @@ exports.success = asyncHandler(async (req ,res) => {
     .status(301)
     .redirect('https://github.com/sslcommerz/SSLCommerz-NodeJS')
 })
+
+
+// fail
+exports.fail = asyncHandler(async (req ,res) => {
+    res
+    .status(301)
+    .redirect('https://github.com/sslcommerz/SSLCommerz-NodeJS')
+})
+
+// cancel
+exports.cancel = asyncHandler(async (req ,res) => {
+    res
+    .status(301)
+    .redirect('https://github.com/sslcommerz/SSLCommerz-NodeJS')
+})
+
+// ipn
+exports.ipn = asyncHandler(async (req ,res) => {
+    res
+    .status(301)
+    .redirect('https://github.com/sslcommerz/SSLCommerz-NodeJS')
+})
