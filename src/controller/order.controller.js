@@ -17,7 +17,7 @@ const SSLCommerzPayment = require('sslcommerz-lts');
 const Invoice = require('../models/invoice.model');
 const store_id = process.env.STORE_ID;
 const store_passwd = process.env.STORE_PASSWORD;
-const is_live = process.env.NODE_ENV == "development" ? false : true ;  //true for live, false for sandbox
+const is_live = process.env.NODE_ENV == "development" ? false : true;  //true for live, false for sandbox
 
 
 
@@ -28,10 +28,10 @@ const is_live = process.env.NODE_ENV == "development" ? false : true ;  //true f
 // Helper: Calculate Delivery Charge
 const deliveryChargeCalculate = async (deliveryCharge) => {
     try {
-    return await deliveryChargeModel.findById(deliveryCharge);
+        return await deliveryChargeModel.findById(deliveryCharge);
         // console.log(charge);
     } catch (error) {
-        throw new CustomError(501 , "error from delivery charge calculate")
+        throw new CustomError(501, "error from delivery charge calculate")
     }
 }
 
@@ -62,7 +62,7 @@ exports.createOrder = asyncHandler(async (req, res) => {
             } else {
                 return await variantModel
                     .findOneAndUpdate(
-                        { _id: item.variant},
+                        { _id: item.variant },
                         { $inc: { stockVariant: -item.quantity, totalSale: item.quantity } },
                         { new: true }
                     )
@@ -105,15 +105,20 @@ exports.createOrder = asyncHandler(async (req, res) => {
     order.totalQuantity = cart.totalProduct;
 
 
-
+    // make a invoice
+    const invoice = await invoiceModel.create({
+        invoiceId: order.transactionId,
+        order: order._id,
+    });
 
 
 
     // payment Method start 
-    if (paymentMethod === "cod"){
+    if (paymentMethod === "cod") {
         order.paymentMethod = "cod";
         order.paymentStatus = "Pending"
-    }else{
+        order.invoiceId = invoice.invoiceId;
+    } else {
         const data = {
             total_amount: order.finalAmount,
             currency: 'BDT',
@@ -141,20 +146,61 @@ exports.createOrder = asyncHandler(async (req, res) => {
             ship_add2: 'Dhaka',
             ship_city: 'Dhaka',
             ship_state: 'Dhaka',
-            // ship_postcode: 1000,
+            ship_postcode: 1000,
             ship_country: 'Bangladesh',
         };
-        const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live)
-        const response = await sslcz.init(data);
-        // console.log(response.GatewayPageURL);
-        if (!response.GatewayPageURL) throw new CustomError(501 , "online payment fail")
+        try {
+            const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live)
+            const response = await sslcz.init(data);
+            // console.log(response.GatewayPageURL);
 
-        order.orderStatus = "Pending";
-        order.paymentMethod = "online"
-        order.totalQuantity = cart.totalProduct;
-        apiResponse.sendSuccess(res , 200 , "ssl url" ,{
-            url: response.GatewayPageURL,
-        });
+
+
+            order.orderStatus = "Pending";
+            order.paymentMethod = "online"
+            order.totalQuantity = cart.totalProduct;
+            order.invoiceId = invoice.invoiceId;
+            await order.save()
+
+
+
+            apiResponse.sendSuccess(res, 200, "ssl url", {
+                url: response.GatewayPageURL,
+            });
+        } catch (error) {
+            // product Roll back
+
+            await Promise.all(
+                cart.items.map(async (item) => {
+                    if (item.product) {
+                        return await productModel
+                            .findOneAndUpdate(
+                                { _id: item.product },
+                                { $inc: { stock: item.quantity, totalSale: -item.quantity } },
+                                { new: true }
+                            )
+                            .select("-QrCode -barCode -updatedAt -tag -reviews");
+                    } else {
+                        return await variantModel
+                            .findOneAndUpdate(
+                                { _id: item.variant },
+                                { $inc: { 
+                                    stockVariant: item.quantity, 
+                                    totalSale: -item.quantity 
+                                }},
+                                { new: true }
+                            )
+                            .select("-QrCode -barCode -updatedAt -tag -reviews");
+                    }
+                })
+            );
+
+
+
+// delete invoice
+            await invoiceModel.findOneAndDelete({ invoiceId: order.invoiceId })
+            if (!response.GatewayPageURL) throw new CustomError(501, "online payment fail")
+        }
     }
 
 
