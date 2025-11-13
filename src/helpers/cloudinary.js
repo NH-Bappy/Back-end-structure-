@@ -43,6 +43,8 @@ exports.removeCloudinaryFile = async(publicId) => {
     try {
         const res = await cloudinary.uploader.destroy(publicId);
         return res.result
+        // Cloudinary returns an object like { result: 'ok' } if deletion succeeds.
+        // So we check if result === 'ok' to confirm the file was successfully deleted.
     } catch (error) {
         console.log("error from cloudinary file delete" ,error);
         throw new CustomError(400 ,error.message)
