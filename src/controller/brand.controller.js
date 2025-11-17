@@ -15,7 +15,7 @@ exports.registerBrand = asyncHandler(async (req, res) => {
     if (!uploadImageUrl) throw new CustomError(500, "your URL is missing or some wrong with your image or database");
     // Creates a new document in MongoDB using your brandModel, with the given value and image
     const brand = await brandModel.create({ ...value, image: uploadImageUrl, })
-    if (!brand) throw new CustomError(501, "brand not created");
+    if (!brand) throw new CustomError(401, "brand not created");
     apiResponse.sendSuccess(res, 200, "brand created successfully", brand);
 });
 
