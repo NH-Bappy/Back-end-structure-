@@ -213,6 +213,44 @@ exports.createOrder = asyncHandler(async (req, res) => {
             if (!response.GatewayPageURL) throw new CustomError(501, "online payment fail")
         }
     }
-
-
 });
+
+// get all order
+
+exports.getallOrder = asyncHandler(async(req ,res ) => {
+    const { MobileNumber } = req.query;
+    const findOrder = await orderModel.find(MobileNumber ? { "shippingInfo.phone": { $regex: MobileNumber , $options: "i"}} : {}).sort({createdAt: -1})
+    apiResponse.sendSuccess(res , 200 , "successfully found order" , findOrder)
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
