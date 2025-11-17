@@ -223,8 +223,37 @@ exports.getallOrder = asyncHandler(async(req ,res ) => {
     apiResponse.sendSuccess(res , 200 , "successfully found order" , findOrder)
 });
 
-
-
+// get all order status
+exports.allStatus = asyncHandler(async (req ,res) => {
+    const allOrderStatus = await orderModel.aggregate([
+        {
+            $group:{
+                _id: "$orderStatus",
+                count:{$sum: 1},
+            }
+        },
+        {
+            $group:{
+                _id: null,
+                totalOrder: { $sum: "$count" },
+                breakdown:{
+                    $push:{
+                        orderStatus: "$_id",
+                        count: "$count",
+                    },
+                },
+            },
+        },
+        {//Removes _id Keeps only totalOrders and breakdown
+            $project:{
+                _id: 0,
+                totalOrder: 1 ,
+                breakdown: 1 ,
+            },
+        },
+    ])
+    apiResponse.sendSuccess(res, 200, "order status found successfully", allOrderStatus)
+});
 
 
 
