@@ -25,12 +25,16 @@ exports.success = asyncHandler(async (req ,res) => {
     console.log("validatePayment", validatePayment);
 
     if (validatePayment.status !== "VALID") throw new CustomError(501, "payment not valid")
-        orderModel.findOneAndUpdate(
+        await orderModel.findOneAndUpdate(
             { transactionId: validatePayment.tran_id },
-            { paymentStatus: validatePayment.status ? "VALID" : "success"}
+            {
+                paymentStatus: validatePayment.status ? "VALID" : "success", 
+                valId: validatePayment.val_id,
+                paymentGatewayData: validatePayment
+            }
     )
 
-    apiResponse.sendSuccess(res , 200 , "payment successful")
+    apiResponse.sendSuccess(res , 200 , "payment successful" ,null)
 })
 
 

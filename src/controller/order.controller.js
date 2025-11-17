@@ -38,6 +38,7 @@ const deliveryChargeCalculate = async (deliveryCharge) => {
 
 exports.createOrder = asyncHandler(async (req, res) => {
     const { user, guestID, shippingInfo, deliveryCharge, paymentMethod } = await validateOrder(req);
+    // console.log(paymentMethod)
     // console.log(value)
     const Id = user ? { user } : { guestID }
     // console.log(Id)
@@ -101,8 +102,8 @@ exports.createOrder = asyncHandler(async (req, res) => {
     // console.log(productName)
 
 
-    order.orderStatus = "Pending";
-    order.totalQuantity = cart.totalProduct;
+    // order.orderStatus = "Pending";
+    // order.totalQuantity = cart.totalProduct;
 
 
     // make a invoice
@@ -111,14 +112,20 @@ exports.createOrder = asyncHandler(async (req, res) => {
         order: order._id,
     });
 
-
+    order.invoiceId = invoice.invoiceId;
 
     // payment Method start 
     if (paymentMethod === "cod") {
         order.paymentMethod = "cod";
-        order.paymentStatus = "Pending"
-        order.invoiceId = invoice.invoiceId;
-    } else {
+        order.paymentStatus = "Pending";
+        await order.save()
+
+        apiResponse.sendSuccess(res, 200, "offline order created successfully (cod)", order);
+    }
+
+
+
+    if (paymentMethod === "online") {
         const data = {
             total_amount: order.finalAmount,
             currency: 'BDT',
@@ -162,11 +169,13 @@ exports.createOrder = asyncHandler(async (req, res) => {
             order.invoiceId = invoice.invoiceId;
             await order.save()
 
+            console.log("ssl commerz response", response)
 
-
-            apiResponse.sendSuccess(res, 200, "ssl url", {
+            apiResponse.sendSuccess(res, 200, "order successful", {
                 url: response.GatewayPageURL,
             });
+
+
         } catch (error) {
             // product Roll back
 
@@ -184,10 +193,12 @@ exports.createOrder = asyncHandler(async (req, res) => {
                         return await variantModel
                             .findOneAndUpdate(
                                 { _id: item.variant },
-                                { $inc: { 
-                                    stockVariant: item.quantity, 
-                                    totalSale: -item.quantity 
-                                }},
+                                {
+                                    $inc: {
+                                        stockVariant: item.quantity,
+                                        totalSale: -item.quantity
+                                    }
+                                },
                                 { new: true }
                             )
                             .select("-QrCode -barCode -updatedAt -tag -reviews");
@@ -197,39 +208,11 @@ exports.createOrder = asyncHandler(async (req, res) => {
 
 
 
-// delete invoice
+            // delete invoice
             await invoiceModel.findOneAndDelete({ invoiceId: order.invoiceId })
             if (!response.GatewayPageURL) throw new CustomError(501, "online payment fail")
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 });
