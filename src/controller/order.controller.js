@@ -267,6 +267,13 @@ exports.updateOrder = asyncHandler(async(req , res) => {
     apiResponse.sendSuccess(res , 200 , "order modified successfully" , modifyOrder)
 });
 
+// Courier Pending
+exports.CourierPending = asyncHandler(async (req, res) => {
+
+    const pending = await orderModel.find({ orderStatus: "CourierPending"});
+    if (!pending) throw new CustomError(404, "order not found")
+    apiResponse.sendSuccess(res, 200, "order modified successfully", pending)
+});
 
 
 
