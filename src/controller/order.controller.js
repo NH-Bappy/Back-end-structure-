@@ -15,6 +15,7 @@ const invoiceModel = require('../models/invoice.model');
 
 const SSLCommerzPayment = require('sslcommerz-lts');
 const Invoice = require('../models/invoice.model');
+const { default: mongoose } = require('mongoose');
 const store_id = process.env.STORE_ID;
 const store_passwd = process.env.STORE_PASSWORD;
 const is_live = process.env.NODE_ENV == "development" ? false : true;  //true for live, false for sandbox
@@ -255,8 +256,16 @@ exports.allStatus = asyncHandler(async (req ,res) => {
     apiResponse.sendSuccess(res, 200, "order status found successfully", allOrderStatus)
 });
 
-
-
+// update order by Id
+exports.updateOrder = asyncHandler(async(req , res) => {
+    const {id} = req.params;
+    if(!mongoose.Types.ObjectId.isValid(id)){
+        throw new CustomError(401 , "Invalid order id");
+    }
+    const modifyOrder = await orderModel.findOneAndUpdate({_id: id} , {...req.body} , {new: true});
+    if(!modifyOrder) throw new CustomError(404 , "order not found")
+    apiResponse.sendSuccess(res , 200 , "order modified successfully" , modifyOrder)
+});
 
 
 

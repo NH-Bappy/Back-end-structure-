@@ -5,7 +5,8 @@ const orderController = require('../../controller/order.controller');
 
 _.route("/create-order").post(orderController.createOrder);
 _.route("/get-all-Order").get(orderController.getallOrder);
-_.route("/get-all-status").get(orderController.allStatus)
+_.route("/get-all-status").get(orderController.allStatus);
+_.route("/update-order/:id").put(orderController.updateOrder);
 
 
 module.exports = _;
