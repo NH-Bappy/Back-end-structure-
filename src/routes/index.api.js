@@ -16,6 +16,7 @@ _.use("/cart" ,require('../routes/api/cart.api'));
 _.use("/deliveryCharge" ,require('../routes/api/delivery.api'));
 _.use("/order" ,require('../routes/api/order.api'));
 _.use("/payment" ,require('../routes/api/paymentGateWay.api'));
+_.use("/courier" , require('./api/courier.api'));
 
 
 
