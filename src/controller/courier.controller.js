@@ -8,3 +8,7 @@ const orderModel = require('../models/order.model');
 
 
 
+exports.createCourier = asyncHandler(async(req ,res) => {
+    const { courierId } = req.body;
+    console.log(courierId)
+});
