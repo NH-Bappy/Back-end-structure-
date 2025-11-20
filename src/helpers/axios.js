@@ -12,7 +12,7 @@ const API = axios.create({
         'Api-Key': `${process.env.STEADFAST_API_KEY}`,
         'Secret-Key': ` ${process.env.STEADFAST_SECRET_KEY}`,
         "Content-Type": "application/json"
-    }
+    },
 });
 
 module.exports = { API }
