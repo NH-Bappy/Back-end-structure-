@@ -18,14 +18,19 @@ exports.createCourier = asyncHandler(async(req ,res) => {
     const orderObject = await orderModel.findById(courierId)
     if(!orderObject) throw new CustomError(404 , "order object not found")
     const { shippingInfo, invoiceId, finalAmount,} = orderObject;
+
     const courierPayload = {
         invoice: invoiceId,
         recipient_name: shippingInfo.firstName,
         recipient_phone: shippingInfo.phone,
-        recipient_email: shippingInfo.email,
+        // recipient_email: shippingInfo.email,
         recipient_address: shippingInfo.address,
         cod_amount: finalAmount
     }
     const response = await API.post("/create_order", courierPayload)
+    if (!response.data || response.data.status !== "200"){
+        throw new CustomError(500 ,"not found the response data you are looking for")
+    }
+    const { consignment } = response.data;
     console.log(response)
 });
