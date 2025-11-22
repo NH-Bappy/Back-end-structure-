@@ -12,11 +12,17 @@ const { API } = require('../helpers/axios');
 
 exports.createCourier = asyncHandler(async(req ,res) => {
     const { courierId } = req.body;
-    if (!mongoose.Types.ObjectId.isValid(courierId)){
-        throw new CustomError(401 , "courier order not found");
+
+    // Validate courierId
+    if (!mongoose.Types.ObjectId.isValid(courierId)) {
+        throw new CustomError(400, "Invalid courierId");
     }
-    const orderObject = await orderModel.findById(courierId)
-    if(!orderObject) throw new CustomError(404 , "order object not found")
+
+    // Fetch order
+    const orderObject = await orderModel.findById(courierId);
+    if (!orderObject) throw new CustomError(404, "Order not found");
+
+
     const { shippingInfo, invoiceId, finalAmount,} = orderObject;
 
     const courierPayload = {
@@ -28,9 +34,31 @@ exports.createCourier = asyncHandler(async(req ,res) => {
         cod_amount: finalAmount
     }
     const response = await API.post("/create_order", courierPayload)
-    if (!response.data || response.data.status !== "200"){
-        throw new CustomError(500 ,"not found the response data you are looking for")
+    // console.log(response)
+    // return
+
+
+    if (!response.data || response.data.status !== 200) {
+        throw new CustomError(500,response.data?.message || "Failed to create courier order");
     }
+
+
     const { consignment } = response.data;
-    console.log(response)
+
+    orderObject.courier = orderObject.courier || {};
+
+
+    orderObject.courier.name ="Steadfast";
+    orderObject.courier.trackingId = consignment.tracking_code;
+    orderObject.courier.rawResponse = consignment;
+    orderObject.courier.status = consignment.status;
+    orderObject.orderStatus = consignment.status;
+    await orderObject.save()
+
+    apiResponse.sendSuccess(res, 200, "successfully created courier order", {
+        trackingId: consignment.tracking_code,
+        message: response.data.message,
+        consignment,
+    });
+    
 });
