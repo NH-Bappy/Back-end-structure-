@@ -10,7 +10,7 @@ const { API } = require('../helpers/axios');
 
 
 
-exports.createCourier = asyncHandler(async(req ,res) => {
+exports.createCourier = asyncHandler(async (req, res) => {
     const { courierId } = req.body;
 
     // Validate courierId
@@ -23,7 +23,7 @@ exports.createCourier = asyncHandler(async(req ,res) => {
     if (!orderObject) throw new CustomError(404, "Order not found");
 
 
-    const { shippingInfo, invoiceId, finalAmount,} = orderObject;
+    const { shippingInfo, invoiceId, finalAmount, } = orderObject;
 
     const courierPayload = {
         invoice: invoiceId,
@@ -39,7 +39,7 @@ exports.createCourier = asyncHandler(async(req ,res) => {
 
 
     if (!response.data || response.data.status !== 200) {
-        throw new CustomError(500,response.data?.message || "Failed to create courier order");
+        throw new CustomError(500, response.data?.message || "Failed to create courier order");
     }
 
 
@@ -48,7 +48,7 @@ exports.createCourier = asyncHandler(async(req ,res) => {
     orderObject.courier = orderObject.courier || {};
 
 
-    orderObject.courier.name ="Steadfast";
+    orderObject.courier.name = "Steadfast";
     orderObject.courier.trackingId = consignment.tracking_code;
     orderObject.courier.rawResponse = consignment;
     orderObject.courier.status = consignment.status;
@@ -60,13 +60,67 @@ exports.createCourier = asyncHandler(async(req ,res) => {
         message: response.data.message,
         consignment,
     });
-    
+
 });
 
 //@ create bulk courier order
-exports.createMultipleCourierOrders = asyncHandler(async (req , res) => {
-    const {orderId} = req.body;
-    if(!Array.isArray(orderId) || orderId.length === 0){
-        throw new CustomError(400 , "")
+exports.createMultipleCourierOrders = asyncHandler(async (req, res) => {
+    const { orderIds } = req.body;
+    if (!Array.isArray(orderIds) || orderIds.length === 0) {
+        throw new CustomError(400, "invalid or empty order ids array")
     }
+
+    // for sendSuccess message
+    let lastBulkResponse = null;
+    let lastConsignment = null;
+
+    // Iterate through each order ID to process it individually
+    for (let singleOrder of orderIds) {
+        if (!mongoose.Types.ObjectId.isValid(singleOrder)) {
+            throw new CustomError(400, "not found any order id")
+        }
+
+        // Fetch order from the database
+        const orderObject = await orderModel.findById(singleOrder);
+        if (!orderObject) throw new CustomError(404, "not found any order");
+        // console.log(orderObject)
+
+
+
+        const { invoiceId, shippingInfo, finalAmount } = orderObject;
+        const courierBulkPayload = {
+            invoice: invoiceId,
+            recipient_name: shippingInfo.firstName,
+            recipient_phone: shippingInfo.phone,
+            recipient_address: shippingInfo.address,
+            cod_amount: finalAmount,
+        }
+
+        // Create the courier order
+        const BulkResponse = await API.post('/create_order', courierBulkPayload);
+        if (!BulkResponse.data || BulkResponse.data.status !== 200) throw new CustomError(400, "failed to create bulk order")
+        // console.log(BulkResponse);
+
+        // Update the order with courier info if needed
+        const { consignment } = BulkResponse.data
+
+        orderObject.courier = orderObject.courier || {};
+
+        orderObject.courier.name = "steadFast";
+        orderObject.courier.trackingId = consignment.tracking_code;
+        orderObject.courier.rawResponse = consignment
+        orderObject.courier.status = consignment.status
+        orderObject.orderStatus = consignment.status
+        await orderObject.save()
+
+        // for sendSuccess message
+        lastBulkResponse = BulkResponse;
+        lastConsignment = consignment;
+    }
+    
+    apiResponse.sendSuccess(res, 200, "successfully created bulk order", {
+        trackingId: lastConsignment.tracking_code,
+        message: lastBulkResponse.data.message,
+        lastConsignment,
+    })
 });
