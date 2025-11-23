@@ -62,3 +62,11 @@ exports.createCourier = asyncHandler(async(req ,res) => {
     });
     
 });
+
+//@ create bulk courier order
+exports.createMultipleCourierOrders = asyncHandler(async (req , res) => {
+    const {orderId} = req.body;
+    if(!Array.isArray(orderId) || orderId.length === 0){
+        throw new CustomError(400 , "")
+    }
+});
