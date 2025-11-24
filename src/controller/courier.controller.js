@@ -124,3 +124,16 @@ exports.createMultipleCourierOrders = asyncHandler(async (req, res) => {
         lastConsignment,
     })
 });
+
+
+// Checking Delivery Status
+exports.checkDeliveryStatus = asyncHandler(async (req , res) => {
+    const { trackingId } = req.query;
+    const deliveryStatusResponse = await API.get(`/status_by_trackingcode/${trackingId}`)
+    // console.log(deliveryStatusResponse)
+    // return
+    if(!deliveryStatusResponse.data || deliveryStatusResponse.data.status !== 200){
+        throw new CustomError(500 , "failed to fetch delivery status")
+    }
+    apiResponse.sendSuccess(res , 200 , "Delivery status found successfully" ,deliveryStatusResponse.data)
+});
