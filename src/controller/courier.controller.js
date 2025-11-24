@@ -137,3 +137,31 @@ exports.checkDeliveryStatus = asyncHandler(async (req , res) => {
     }
     apiResponse.sendSuccess(res , 200 , "Delivery status found successfully" ,deliveryStatusResponse.data)
 });
+
+// get current balance
+exports.currentBalance = asyncHandler(async(req ,res) => {
+    const balanceResponse = await API.get("/get_balance")
+    if (!balanceResponse.data || balanceResponse.data.status !== 200) {
+        throw new CustomError(500, "failed to fetch delivery status")
+    }
+    apiResponse.sendSuccess(res, 200, "Delivery status found successfully", balanceResponse.data)
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
