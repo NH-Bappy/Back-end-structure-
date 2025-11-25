@@ -165,8 +165,18 @@ exports.createReturnStatus = asyncHandler(async(req ,res) => {
     const orderObject = await orderModel.findOne({
         invoiceId: returnResponse.data.consignment.invoice
     });
-    console.log(orderObject)
+    // console.log(orderObject)
     if(!orderObject) throw new CustomError(404 , "order not found");
+
+
+    // update order status
+    orderObject.returnStatus = "requested";
+    orderObject.returnId = returnResponse.data.id;
+    orderObject.orderStatus = returnResponse.data.status;
+    orderObject.returnStatusHistory = returnResponse.data
+    await orderObject.save()
+
+    apiResponse.sendSuccess(res , 200 ,"return request created successfully" ,returnResponse.data)
 
 
 
