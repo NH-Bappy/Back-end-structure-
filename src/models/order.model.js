@@ -100,6 +100,17 @@ const orderSchema = new mongoose.Schema(
                 default: "pending",
             },
         },
+        returnStatus:{
+            type: String,
+            default: "No Request"
+        },
+        returnId:{
+            type: Number,
+        },
+        returnStatusHistory:{
+            type: mongoose.Schema.Types.Mixed,
+            default: null,    
+        },
         followUp: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",

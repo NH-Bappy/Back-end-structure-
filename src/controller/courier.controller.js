@@ -148,6 +148,31 @@ exports.currentBalance = asyncHandler(async(req ,res) => {
 })
 
 
+// create return request
+exports.createReturnStatus = asyncHandler(async(req ,res) => {
+    const { consignment_id } = req.body;
+    if (!consignment_id) throw new CustomError(400, "consignment Id is missing" );
+    // console.log(consignment_id);
+
+    const returnResponse = await API.post("/create_return_request", {
+        consignment_id,
+        reason: "Customer Request for return"
+    });
+    // console.log(returnResponse);
+    if (!returnResponse?.data) throw new CustomError(500 , "failed to create return request");
+
+    // find order and update its status
+    const orderObject = await orderModel.findOne({
+        invoiceId: returnResponse.data.consignment.invoice
+    });
+    console.log(orderObject)
+    if(!orderObject) throw new CustomError(404 , "order not found");
+
+
+
+
+});
+
 
 
 
