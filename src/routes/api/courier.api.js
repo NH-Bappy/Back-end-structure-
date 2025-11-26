@@ -9,5 +9,6 @@ _.route("/check-delivery-status").get(courierController.checkDeliveryStatus);
 _.route('/current-balance').get(courierController.currentBalance);
 _.route("/create-return-status").post(courierController.createReturnStatus);
 _.route("/single-return-request").get(courierController.singleReturnRequest);
+_.route("/steadfast-webhook").post(courierController.handleSteadfastWebhook);
 
 module.exports = _;

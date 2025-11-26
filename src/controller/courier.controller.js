@@ -190,9 +190,13 @@ exports.singleReturnRequest = asyncHandler(async(req ,res) => {
     apiResponse.sendSuccess(res, 200, "successfully found single return request", singleReturnObject.data);
 })
 
+// setadfast weebhok handler
 
-
-
+exports.handleSteadfastWebhook = asyncHandler(async(req ,res) => {
+    const payload = req.body;
+    const token = process.env.STEADFAST_TOKEN;
+    console.log("steadfast web token", payload)
+})
 
 
 
