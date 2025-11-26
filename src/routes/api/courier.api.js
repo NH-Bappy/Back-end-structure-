@@ -8,5 +8,6 @@ _.route("/multiple-courier").post(courierController.createMultipleCourierOrders)
 _.route("/check-delivery-status").get(courierController.checkDeliveryStatus);
 _.route('/current-balance').get(courierController.currentBalance);
 _.route("/create-return-status").post(courierController.createReturnStatus);
+_.route("/single-return-request").get(courierController.singleReturnRequest);
 
 module.exports = _;

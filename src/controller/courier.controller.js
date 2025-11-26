@@ -177,13 +177,18 @@ exports.createReturnStatus = asyncHandler(async(req ,res) => {
     await orderObject.save()
 
     apiResponse.sendSuccess(res , 200 ,"return request created successfully" ,returnResponse.data)
-
-
-
-
 });
 
+// Single Return Request View
 
+exports.singleReturnRequest = asyncHandler(async(req ,res) => {
+    const { returnId } = req.query;
+    if(!returnId) throw new CustomError(404 , "return id not found");
+
+    const singleReturnObject = await API.get(`/get_return_request/${returnId}`);
+    if(!singleReturnObject) throw new CustomError(500 , "failed to fetch single return request")
+    apiResponse.sendSuccess(res, 200, "successfully found single return request", singleReturnObject.data);
+})
 
 
 
