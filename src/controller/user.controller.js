@@ -135,9 +135,8 @@ exports.login = asyncHandler(async (req, res) => {
     res.cookie("refreshToken", refreshToken, {
         httpOnly: true, //The cookie cannot be accessed via JavaScript (document.cookie) on the client side.
         secure: process.env.NODE_ENV == "development" ? false : true,
-        sameSite: "none",// allows the cookie to be sent across different domains (important if your frontend and backend are on different domains).
+        sameSite: "lax",// allows the cookie to be sent across different domains (important if your frontend and backend are on different domains).
         path: "/",
-        maxAge: 15 * 24 * 60 * 60 * 1000,
     })
     // refresh token save into database
     await user.updateOne({ refreshToken });
@@ -147,6 +146,8 @@ exports.login = asyncHandler(async (req, res) => {
         email: user.email,
         phoneNumber: user.phoneNumber,
     });
+
+    apiResponse.sendSuccess(res, 200, "login successfully", accessToken, refreshToken)
 })
 
 // logout
