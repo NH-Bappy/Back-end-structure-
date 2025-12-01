@@ -140,6 +140,8 @@ exports.login = asyncHandler(async (req, res) => {
     const user = await userModel.findOne({ email });
     if (!user) throw new CustomError(401, "user not found");
 
+    console.log(user)
+
     // password is right or not
     const checkPassword = await user.comparePassword(password);
     if (!checkPassword) throw new CustomError(401, "your password or email in incorrect");
@@ -160,12 +162,11 @@ exports.login = asyncHandler(async (req, res) => {
     await user.updateOne({ refreshToken });
     apiResponse.sendSuccess(res, 200, "Login successful", {
         accessToken,
+        refreshToken,
         userName: user.name,
         email: user.email,
         phoneNumber: user.phoneNumber,
     });
-
-    apiResponse.sendSuccess(res, 200, "login successfully", accessToken, refreshToken)
 })
 
 // logout
