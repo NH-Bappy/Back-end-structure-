@@ -22,16 +22,23 @@ exports.registration = asyncHandler(async (req, res) => {
 
     // console.log(Otp())
 
+    // ⬇️ Validate user input
     const value = await validateUser(req)
     // console.log(value)
 
 
-    //now save the user into database
+    // ⬇️ Check duplicate email before creating user
+    const isExist = await userModel.findOne({ email: value.email });
+    if (isExist) {
+        throw new CustomError(409, "email already exists");
+    }
+
+
+    // ⬇️ Now save the user into database
     const user = await new userModel({
         name: value.name, // this from user schema and i get this value from postman (e.g name , email ,password)
         email: value.email || null,
         password: value.password,
-        phoneNumber: value.phoneNumber || null,
     }).save()
 
     if (!user) {
@@ -40,16 +47,27 @@ exports.registration = asyncHandler(async (req, res) => {
 
     // send confirm registration mail
     const verifyEmailLink = `www.frontend.com/verifyEmail${user.email}`
+
     user.resetPasswordOTP = Otp();
     user.resetPasswordExpires = Date.now() + 10 * 60 * 1000;
-    const template = registrationTemplate(user.name, user.email, user.resetPasswordOTP, user.resetPasswordExpires, verifyEmailLink);
 
-    // send email to customer
-    const result = await emailSend(user.email, template, "Confirm Your Email");
-    if (!result) {
-        throw new CustomError(501, 'email send fail')
-    }
+    const template = registrationTemplate(
+        user.name,
+        user.email,
+        user.resetPasswordOTP,
+        user.resetPasswordExpires,
+        verifyEmailLink
+    );
+
+    // send email
+    // const result = await emailSend(user.email, template, "Confirm Your Email");
+
+    // if (!result) {
+    //     throw new CustomError(501, 'email send fail')
+    // }
+
     await user.save();
+
     apiResponse.sendSuccess(res, 201, "registration successful")
 });
 
