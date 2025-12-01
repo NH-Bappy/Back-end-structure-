@@ -140,7 +140,7 @@ exports.login = asyncHandler(async (req, res) => {
     const user = await userModel.findOne({ email });
     if (!user) throw new CustomError(401, "user not found");
 
-    console.log(user)
+    // console.log(user)
 
     // password is right or not
     const checkPassword = await user.comparePassword(password);
