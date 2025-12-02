@@ -162,7 +162,6 @@ exports.login = asyncHandler(async (req, res) => {
     await user.updateOne({ refreshToken });
     apiResponse.sendSuccess(res, 200, "Login successful", {
         accessToken,
-        refreshToken,
         userName: user.name,
         email: user.email,
         phoneNumber: user.phoneNumber,
