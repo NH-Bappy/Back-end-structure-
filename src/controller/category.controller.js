@@ -102,17 +102,32 @@ exports.modifyCategory = asyncHandler(async (req , res) => {
 
 
 // delete category from data base
-exports.removeCategory = asyncHandler(async (req ,res) => {
-    const {slug} = req.params;
-    if(!slug) throw new CustomError(401 , "slug is missing");
-    const category = await categoryModel.findOne({slug});
-    if(!category) throw new CustomError(500 , "category not found");
-    if(category.image){
-        const splitLink = category.image.split('/');
-        const lastPart = splitLink[splitLink.length -1]
-        const removeImage = await removeCloudinaryFile(lastPart.split('?')[0]);
-        if(removeImage !== "ok") throw new CustomError(401 , "image not deleted");
+exports.removeCategory = asyncHandler(async (req, res) => {
+    const { slug } = req.params;
+    if (!slug) throw new CustomError(401, "slug is missing");
+
+    // Find category
+    const category = await categoryModel.findOne({ slug });
+    if (!category) throw new CustomError(404, "category not found");
+
+    // Extract image ID
+    let imageId = null;
+    if (category.image) {
+        const splitLink = category.image.split("/");
+        const lastPart = splitLink[splitLink.length - 1];
+        imageId = lastPart.split("?")[0];
     }
-    const removeCategory =await categoryModel.findOneAndDelete({slug})
-    apiResponse.sendSuccess(res , 200 , "category remove successfully" , removeCategory)
+
+    //Delete category immediately (fast) fro faster response time
+    const removed = await categoryModel.findOneAndDelete({ slug });
+
+    // Send response instantly
+    apiResponse.sendSuccess(res, 200, "category removed successfully", removed);
+
+    // Delete image in background (does NOT slow response)
+    if (imageId) {
+        removeCloudinaryFile(imageId)
+            .then((resp) => console.log("Background image deleted:", resp))
+            .catch((err) => console.log("Failed to delete image:", err));
+    }
 });
