@@ -128,7 +128,7 @@ userSchema.methods.comparePassword = async function (humanPass) {
 // It has three parts:
 
 
-userSchema.methods.generateAccessToken = async function () {
+userSchema.methods.generateAccessToken = function () {
     return jwt.sign({
         userId: this._id, //Payload → Data you put inside (like userId, email, role).
         email: this.email,
@@ -140,14 +140,14 @@ userSchema.methods.generateAccessToken = async function () {
 }
 
 //generate refresh Token
-userSchema.methods.generateRefreshToke = async function () {
+userSchema.methods.generateRefreshToke = function () {
     return jwt.sign({
         userId: this._id,
     }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRE })
 }
 
 // verify accessToken ||This method checks if a given JWT token is valid
-userSchema.methods.verifyAccessToken = async function (token) {
+userSchema.methods.verifyAccessToken = function (token) {
     try {
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
         return decoded   // return user data if valid

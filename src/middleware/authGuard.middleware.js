@@ -12,8 +12,15 @@ exports.authGuard = asyncHandler(async (req, res, next) => {
     const rawHeader = req.headers.authorization;
     // console.log("RAW HEADER:", rawHeader);
 
-    const accessToken = rawHeader.replace("Bearer ", "");
-    // console.log("TOKEN:", accessToken);
+    const accessToken = rawHeader?.replace("Bearer ", "").trim();
+    if (!accessToken) {
+        throw new CustomError(
+            405,
+            "TOKEN: accessToken is missing from authGuard",
+            accessToken
+        );
+    }
+
 
     let tokenObject;
 

@@ -9,6 +9,7 @@ const { Otp, emailSend } = require('../helpers/helper');
 const jwt = require('jsonwebtoken');
 
 
+
 // user registration
 exports.registration = asyncHandler(async (req, res) => {
     // console.log("he stop")
@@ -193,4 +194,11 @@ exports.logout = asyncHandler(async (req, res) => {
 
     // Send success response
     apiResponse.sendSuccess(res, 201, "successfully logout", { user });
+});
+
+
+// send refreshToken token function
+exports.refreshToken = asyncHandler(async(req ,res) => {
+    const token = req.cookies;
+    console.log(token);
 });
