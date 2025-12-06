@@ -15,7 +15,7 @@ exports.authGuard = asyncHandler(async (req, res, next) => {
     const accessToken = rawHeader?.replace("Bearer ", "").trim();
     if (!accessToken) {
         throw new CustomError(
-            405,
+            404,
             "TOKEN: accessToken is missing from authGuard",
             accessToken
         );
@@ -27,7 +27,7 @@ exports.authGuard = asyncHandler(async (req, res, next) => {
     try {
         tokenObject = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
     } catch (err) {
-        throw new CustomError(406, "Token is invalid or expired and this is coming from authGuard");
+        throw new CustomError(403, "Token is invalid or expired and this is coming from authGuard");
     }
 
     const userProfile = await userModel.findById(tokenObject.userId);

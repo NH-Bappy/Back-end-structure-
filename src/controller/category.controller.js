@@ -38,7 +38,7 @@ exports.newCategory = asyncHandler(async (req, res) => {
                     { image: imageUrl },
                     { new: true }
                 );
-                console.log("Category image successfully uploaded in background.");
+                // console.log("Category image successfully uploaded in background.");
 
                 // Delete temporary local file after Cloudinary upload
                 if (fs.existsSync(value.image.path)) {
@@ -46,7 +46,7 @@ exports.newCategory = asyncHandler(async (req, res) => {
                         if (err) console.log("Delete failed:", err);
                     });
                 } else {
-                    console.log("Temp file already gone:", value.image.path);
+                    // console.log("Temp file already gone:", value.image.path);
                 }
 
             }
