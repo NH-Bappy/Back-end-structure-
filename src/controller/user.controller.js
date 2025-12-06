@@ -198,7 +198,31 @@ exports.logout = asyncHandler(async (req, res) => {
 
 
 // send refreshToken token function
-exports.refreshToken = asyncHandler(async(req ,res) => {
-    const token = req.cookies;
-    console.log(token);
+exports.refreshToken = asyncHandler(async (req, res) => {
+    const token = req.cookies.refreshToken;
+    // console.log(token);
+    if (!token) throw new CustomError(401, "No refresh token provided");
+
+    let decodeToken;
+    try {
+        decodeToken = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+        // console.log(decodeToken)
+    } catch (err) {
+        throw new CustomError(401, "Invalid or expired refresh token");
+    }
+
+    // find the user
+    const user = await userModel.findById(decodeToken.userId);
+    // console.log(user)
+    if (!user) throw new CustomError(404, "User not found for refresh token");
+
+    // generate new access token
+    const newAccessToken = await user.generateAccessToken();
+    // console.log(setNewToken)
+    apiResponse.sendSuccess(
+        res,
+        200,
+        "Refresh token sent successfully",
+        { accessToken: newAccessToken }
+    );
 });

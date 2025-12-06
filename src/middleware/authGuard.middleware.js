@@ -27,7 +27,7 @@ exports.authGuard = asyncHandler(async (req, res, next) => {
     try {
         tokenObject = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
     } catch (err) {
-        throw new CustomError(401, "Token is invalid or expired");
+        throw new CustomError(406, "Token is invalid or expired and this is coming from authGuard");
     }
 
     const userProfile = await userModel.findById(tokenObject.userId);
