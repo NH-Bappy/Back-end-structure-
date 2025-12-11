@@ -64,28 +64,27 @@ exports.modifyCategory = asyncHandler(async (req, res) => {
 
 //@desc delete category from data base
 
-exports.removeBrand = asyncHandler(async (req,res) => {
+exports.removeBrand = asyncHandler(async (req, res) => {
     const { slug } = req.params;
-    if (!slug) throw new CustomError(401, " The slug does not match");
-    const brandModelFind = await brandModel.findOne({ slug });
-    if (!brandModelFind) throw new CustomError(500, "brand data not found");
-    if (brandModelFind.image) {
-        // upload image
-        // console.log(brandModelFind.image)
-        // return
-        const parts = brandModelFind.image.split('/');
-        // console.log(parts);
-        // return
-        const publicId = parts[parts.length - 1];
 
-        // console.log(publicId);
-        
-        // return
-        // console.log(publicId.split("?")[0]);
-        // return
-        const result = await removeCloudinaryFile(publicId.split("?")[0]);
-        if (result !== "ok") throw new CustomError(401, "image not deleted")
+    if (!slug) throw new CustomError(401, "The slug does not match");
+
+    const brand = await brandModel.findOne({ slug });
+    if (!brand) throw new CustomError(404, "Brand data not found");
+
+    // Try deleting image if it exists
+    if (brand.image) {
+        try {
+            const url = brand.image;
+            const filename = url.split("/").pop();
+            const cleanFilename = filename.split("?")[0];
+            const publicId = cleanFilename.split(".")[0];
+            await removeCloudinaryFile(publicId);
+        } catch (error) {
+            console.warn("Cloudinary delete failed but brand will still be removed:", error.message);
+        }
     }
-    const removeBrand = await brandModel.findOneAndDelete({ slug })
-    apiResponse.sendSuccess(res, 200, "brand remove successfully",removeBrand)
+    // ALWAYS DELETE BRAND (whether image deleted or not)
+    const removedBrand = await brandModel.findOneAndDelete({ slug });
+    apiResponse.sendSuccess(res, 200, "Brand removed successfully", removedBrand);
 });
