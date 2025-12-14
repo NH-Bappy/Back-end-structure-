@@ -23,7 +23,7 @@ const productValidationSchema = Joi.object({
         "any.required": "Category is required.",
     }),
     subCategory: Joi.custom(isValidObjectId).allow(null, ""),
-    Brand: Joi.custom(isValidObjectId).allow(null, ""),
+    brand: Joi.custom(isValidObjectId).allow(null, ""),
     
     variant: Joi.custom(isValidObjectId).allow(null, ""),
 
@@ -59,6 +59,7 @@ const productValidationSchema = Joi.object({
         "number.base": "Retail price must be a number.",
         "any.required": "Retail price is required.",
     }),
+    shippingInformation: Joi.string().allow("", null),
     retailPriceProfitAmount: Joi.number().allow(null),
     retailPriceProfitPercentage: Joi.number().max(100).allow(null),
     wholesalePrice: Joi.number().messages({
