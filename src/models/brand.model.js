@@ -77,4 +77,4 @@ brandSchema.pre("save", async function (next) {
 // ----------------------
 // Export Model
 // ----------------------
-module.exports = mongoose.model("Brand", brandSchema);
+module.exports = mongoose.model("brand", brandSchema);

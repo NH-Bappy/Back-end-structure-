@@ -46,7 +46,22 @@ exports.CreateNewProduct = asyncHandler(async (req, res) => {
 //@desc get all product
 
 exports.showAllProduct = asyncHandler(async (req, res) => {
-    const findAllProduct = await productModel.find({}).populate({ path: "category subCategory Brand discount", }).sort({ createdAt: -1 });
+    const { ptype } = req.query;
+    let queryObject = {};
+
+    if (ptype === "single") {
+        queryObject.variantType = "singleVariant";
+    } else if (ptype === "multiple") {
+        queryObject.variantType = "multipleVariant";
+    } else {
+        // If ptype is not provided, match both types
+        queryObject.variantType = { $in: ["singleVariant", "multipleVariant"] }; //$in is a query operator that matches any value in an array.
+    }
+
+
+
+    const findAllProduct = await productModel.find(queryObject).populate({ path: "category subCategory brand discount", }).sort({ createdAt: -1 }).select("-QrCode -barCode");
+
     if (!findAllProduct.length) throw new CustomError(400, "find product failed");
     apiResponse.sendSuccess(res, 200, "all product found successfully", findAllProduct);
 });
