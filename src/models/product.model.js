@@ -9,24 +9,49 @@ const productSchema = new Schema({
         required: true,
         trim: true,
     },
-    description: { type: String, trim: true },
-    slug: { type: String, unique: true },
+    description: { 
+        type: String, 
+        trim: true 
+    },
+    slug: { 
+        type: String, 
+        unique: true 
+    },
     category: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "category",
         required: true,
     },
-    subCategory: { type: mongoose.Schema.Types.ObjectId, ref: "subCategory", required: false },
-    brand: { type: mongoose.Schema.Types.ObjectId, ref: "brand" },
-
+    subCategory: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: "subCategory", 
+        required: false, 
+        default: null
+    },
+    brand: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: "brand", 
+        default: null 
+    },
     variant: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "variant"
     }],
 
-    discount: { type: mongoose.Schema.Types.ObjectId, ref: "discount" },
-    reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
-    warehouseLocation: { type: mongoose.Schema.Types.ObjectId, ref: "Warehouse" },
+    discount: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: "discount" 
+
+    },
+    reviews: [{ 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: "Review" 
+
+    }],
+    warehouseLocation: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: "Warehouse" 
+    },
     image: [{}],
     tag: [String],
     manufactureCountry: String,

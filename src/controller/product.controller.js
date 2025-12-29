@@ -68,9 +68,9 @@ exports.showAllProduct = asyncHandler(async (req, res) => {
 
 //@desc get single product
 exports.findSingleProduct = asyncHandler(async (req, res) => {
-    const { slug } = req.params;
+    const { slug } = req.query;
     if (!slug) throw new CustomError(400, "slug is missing");
-    const singleProduct = await productModel.findOne({ slug }).populate({ path: "category subCategory Brand discount", });
+    const singleProduct = await productModel.findOne({ slug }).populate({ path: "category subCategory brand discount", });
     if (!singleProduct) throw new CustomError(400, "single product not found");
     apiResponse.sendSuccess(res, 200, "single found successfully", singleProduct)
 });
