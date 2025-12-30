@@ -38,7 +38,7 @@ const productValidationSchema = Joi.object({
         "Out of Stock",
         "PreOrder"
     ),
-    sku: Joi.string().required().messages({
+    sku: Joi.string().messages({
         "string.empty": "SKU is required.",
     }),
     QrCode: Joi.string().allow("", null),
@@ -46,8 +46,7 @@ const productValidationSchema = Joi.object({
     groupUnit: Joi.string().valid("Box", "Packet", "Dozen", "Custom"),
     groupUnitQuantity: Joi.number().allow(null).optional(),
     unit: Joi.string()
-        .valid("Piece", "Kg", "Gram", "Packet", "Custom")
-        .required(),
+        .valid("Piece", "Kg", "Gram", "Packet", "Custom"),
     variantType: Joi.string()
         .valid("singleVariant", "multipleVariant")
         .required(),
@@ -71,7 +70,6 @@ const productValidationSchema = Joi.object({
     inStock: Joi.boolean().allow(null),
     isActive: Joi.boolean().allow(null).default(true),
     minimumOrderQuantity: Joi.number().allow(null),
-    tag: Joi.array().items(Joi.string()).allow(null),
     reviews: Joi.array().items(Joi.custom(isValidObjectId)).allow(null),
 },
     {

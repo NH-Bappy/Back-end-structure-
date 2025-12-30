@@ -64,7 +64,10 @@ const productSchema = new Schema({
         enum: ["In Stock", "Out of Stock", "PreOrder"],
     },
     shippingInformation: String,
-    sku: { type: String, unique: true },
+    sku: { 
+        type: String, 
+        // unique: true 
+    },
     QrCode: String,
     barCode: String,
     groupUnit: { type: String, enum: ["Box", "Packet", "Dozen", "Custom"] },
