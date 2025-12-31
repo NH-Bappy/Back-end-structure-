@@ -24,7 +24,7 @@ const productValidationSchema = Joi.object({
     }),
     subCategory: Joi.custom(isValidObjectId).allow(null, ""),
     brand: Joi.custom(isValidObjectId).allow(null, ""),
-    
+
     variant: Joi.custom(isValidObjectId).allow(null, ""),
 
     discount: Joi.custom(isValidObjectId).allow(null, ""),
@@ -81,31 +81,40 @@ const productValidationSchema = Joi.object({
 exports.validateProduct = async (req) => {
     try {
         const data = await productValidationSchema.validateAsync(req.body);
+        if (value.variantType === "singleVariant") {
 
-        // Validate image files
-        const acceptTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+            // Validate image files
+            const acceptTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
 
-        if (!req?.files?.image || req.files.image.length === 0) {
-            throw new CustomError(400, "At least one product image is required.");
-        }
-
-        // mimetype + size check
-        for (const oneImage of req.files.image) {
-            if (!acceptTypes.includes(oneImage.mimetype)) {
-                throw new CustomError(
-                    400,
-                    `Image type '${oneImage.mimetype}' is not allowed.`
-                );
+            if (!req?.files?.image || req.files.image.length === 0) {
+                throw new CustomError(400, "At least one product image is required.");
             }
-            if (oneImage.size > 5 * 1024 * 1024) {
-                throw new CustomError(400, "Each image must be under 5MB.");
+
+            // mimetype + size check
+            for (const oneImage of req.files.image) {
+                if (!acceptTypes.includes(oneImage.mimetype)) {
+                    throw new CustomError(
+                        400,
+                        `Image type '${oneImage.mimetype}' is not allowed.`
+                    );
+                }
+                if (oneImage.size > 5 * 1024 * 1024) {
+                    throw new CustomError(400, "Each image must be under 5MB.");
+                }
+            }
+            return {
+                ...data,
+                image: req.files.image || null, // returning full image array
+            }
+
+        } else {
+            return {
+                ...data,
+                image: null, // returning full image array
             }
         }
 
-        return {
-            ...data,
-            image: req.files.image, // returning full image array
-        }
+
 
     } catch (error) {
         console.log("Error from validateProduct method:", error.details ? error.details[0].message : error.message);
