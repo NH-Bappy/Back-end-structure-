@@ -13,18 +13,19 @@ const { validateProduct } = require('../validation/Product.validation');
 exports.CreateNewProduct = asyncHandler(async (req, res) => {
     const data = await validateProduct(req);
     // console.log(data)
-    // upload image to cloudinary
-    const { image } = data;
-    const allImageLink = [];
-    for (let oneImage of image) {
-        const singleImagePath = await uploadFileInCloudinary(oneImage.path);
-        // console.log(singleImagePath);
-        allImageLink.push(singleImagePath);
-    };
+    let allImageLink = [];
+    if (data.variantType == "singleVariant"){
+        // upload image to cloudinary
+        const { image } = data;
+        for (let oneImage of image) {
+            const singleImagePath = await uploadFileInCloudinary(oneImage.path);
+            // console.log(singleImagePath);
+            allImageLink.push(singleImagePath);
+        };
+    }
 
     // upload to database
-
-    const productObject = await productModel.create({ ...data, image: allImageLink });
+    const productObject = await productModel.create({ ...data, image: allImageLink ?? null});
     // console.log(productObject);
     if (!productObject) throw new CustomError(400, "something wrong with your product");
     //QRCode link www.front-end.com/product/${product.slug}
@@ -32,9 +33,12 @@ exports.CreateNewProduct = asyncHandler(async (req, res) => {
 
     // make a QRCode with this link
     const QRCode = await generateQR(QRCodeLink);
+    let barCode = null
+    if (data.variantType == "singleVariant"){
+        // make a bar code
+        barCode = await generateBarcode(productObject.sku);
+    }
 
-    // make a bar code
-    const barCode = await generateBarcode(productObject.sku);
     //now update the product
     productObject.QrCode = QRCode;
     productObject.barCode = barCode;

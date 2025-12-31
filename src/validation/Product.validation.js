@@ -81,7 +81,7 @@ const productValidationSchema = Joi.object({
 exports.validateProduct = async (req) => {
     try {
         const data = await productValidationSchema.validateAsync(req.body);
-        if (value.variantType === "singleVariant") {
+        if (data.variantType === "singleVariant") {
 
             // Validate image files
             const acceptTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
