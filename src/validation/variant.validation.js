@@ -37,6 +37,9 @@ const variantValidationSchema = Joi.object({
     retailPrice: Joi.number().min(0).required().messages({
         "any.required": "Retail price is required.",
     }),
+    sku: Joi.string().messages({
+        "string.empty": "SKU is required.",
+    }),
     wholesalePrice: Joi.number().min(0).required().messages({
         "any.required": "Wholesale price is required.",
     }),

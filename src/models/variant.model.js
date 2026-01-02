@@ -21,6 +21,11 @@ const variantSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
+    sku: {
+        type: String,
+        unique: true,
+        required: true,
+    },
     description: {
         type: String,
         trim: true,
